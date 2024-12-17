@@ -20,6 +20,15 @@ const Shoes =()=>{
         fetchAllShoes()
     },[])
     
+    const handleDelete =async(id)=>{
+        try{
+            await axios.delete("http://localhost:8800/shoes/" +id)
+            window.location.reload()
+        }catch(err){
+            console.log(err)
+        }
+    }
+
     return (
         <div>
             <h1>MARKETPLACE</h1> 
@@ -30,6 +39,8 @@ const Shoes =()=>{
                     <h2> {shoe.prod_name}</h2>
                     <p>{shoe.prod_description}</p>
                     <span>{shoe.price}</span>
+                    <button className='delete' onClick={()=>handleDelete(shoe.id)}>Delete</button>
+                    <button className='update'><Link to={`/update/${shoe.id}`}>Update</Link></button>
                     </div>
                 
                 ))}

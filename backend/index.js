@@ -40,6 +40,35 @@ app.post("/shoes", (req, res)=>{
     })
 })
 
+app.delete("/shoes/:id", (req,res)=>{
+    const shoeId = req.params.id;
+    const q = "DELETE FROM shoes WHERE id = ?" // executes sql statements for deleting items
+
+    db.query(q, [shoeId], (err, data)=>{
+        if (err) return res.json(err)
+        return res.json("Successfully executed")
+    })
+})
+
+app.put("/shoes/:id", (req,res)=>{
+    const shoeId = req.params.id;
+    const q = "UPDATE shoes SET `prod_name`=?, `prod_description`=?, `image`=?, `price`=? WHERE id = ?"  // executes sql statements for deleting items
+
+    const values = [
+       
+        req.body.prod_name,
+        req.body.prod_description,
+        req.body.image,
+        req.body.price,
+ 
+     ];
+
+    db.query(q, [...values, shoeId], (err, data)=>{
+        if (err) return res.json(err)
+        return res.json("Item has been successfully updated")
+    })
+})
+
 app.listen(8800, ()=>{
     console.log("connected to backend")
 })

@@ -1,0 +1,35 @@
+.App{
+    height: 100vh;
+    padding: 0px 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+}
+
+.shoes{
+    display: flex;
+    gap: 10px;
+}
+
+.shoe{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+img{
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    background-color: aquamarine;
+}
+
+.form{
+    display: flex;
+    flex-direction: column; 
+    gap: 20px;
+}
