@@ -34,6 +34,7 @@ const Add =()=>{
             <input type="text" placeholder='Name' onChange={handleChange} name="prod_name" />
             <input type="text" placeholder='Description' onChange={handleChange} name="prod_description" />
             <input type="number" placeholder='Price' onChange={handleChange} name="price"/>
+            <input type="number" placeholder='Stock' onChange={handleChange} name="stock"/>
             <input type="text" placeholder='Image' onChange={handleChange} name="image" />
             
             <button onClick={handleClick}>Add</button>
