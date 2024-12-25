@@ -28,19 +28,29 @@ const AddUser = () => {
         try {
             // Send registration data to the backend
             const response = await axios.post("http://localhost:8800/register", {
+                userID: user.userID,
                 name: user.name,
                 email: user.email,
                 password: user.password,
                 role: user.role,
             });
 
+            // Assuming the response contains the user ID (adjust based on your response structure)
+            const userID = response.data.userID; // Adjust this according to your API response structure
+            const userName = response.data.name
+
+            localStorage.setItem("userID", userID); // Store the user's ID
+            localStorage.setItem("name", userName); // Store the user's ID
+            
+            console.log("userid: "+ userID, "username: " + user.name);
+
             // Role-based redirection
             if (response.data.role.toLowerCase() === "admin") {
                 alert("Admin account created successfully!");
-                navigate("/"); // Redirect to admin dashboard
+                navigate(`/home/${userID}`); // Redirect to admin dashboard with userID
             } else {
                 alert("Customer account created successfully!");
-                navigate("/home"); // Redirect to customer dashboard
+                navigate(`/home/${userID}`); // Redirect to customer dashboard with userID
             }
         } catch (err) {
             console.error(err);

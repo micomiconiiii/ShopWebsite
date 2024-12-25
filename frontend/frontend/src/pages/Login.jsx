@@ -16,18 +16,27 @@ const Login = () => {
             const response = await axios.post("http://localhost:8800/login", {
                 email,
                 password,
+                
             });
-            const { token, role } = response.data;
+            
+            // Assuming the response contains the user's name, token, role, and userID
+            const { token, role, name, userID } = response.data;
+
+            // Store the user's data in localStorage
             localStorage.setItem("token", token);
-            localStorage.setItem("role", role); // Store user role
+            localStorage.setItem("role", role);
+            localStorage.setItem("name", name);
+            localStorage.setItem("userID", userID); // Store the user's ID
+            console.log(response.data);
 
             // Redirect based on role
             if (role === "admin") {
                 alert("Admin Login successful!");
                 navigate("/"); // Redirect to admin dashboard
             } else {
-                alert("Customer Login successful!");
-                navigate("/home"); // Redirect to customer dashboard
+                
+                alert(`${userID}`);
+                navigate(`/home/${userID}`); // Pass userID as a URL parameter to home
             }
         } catch (err) {
             console.error(err);

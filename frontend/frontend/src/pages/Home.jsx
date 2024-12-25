@@ -1,91 +1,130 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const Shoes = () => {
+  const { userID } = useParams(); // Retrieve userID from the URL
+  const navigate = useNavigate(); // For navigating to other pages
   const [shoes, setShoes] = useState([]);
-  const [sortOption, setSortOption] = useState('price'); // Default sorting by price
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [sortedShoes, setSortedShoes] = useState([]); // Store sorted shoes here
+  const [sortOption, setSortOption] = useState('price');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortedShoes, setSortedShoes] = useState([]);
+  const [userName, setUserName] = useState(localStorage.getItem('name') || '');
+  const userId = localStorage.getItem('userID'); // Ensure userId is available
 
   // Fetch all shoes data
   useEffect(() => {
     const fetchAllShoes = async () => {
       try {
-        const res = await axios.get("http://localhost:8800/shoes");
-        setShoes(res.data); // Set the shoes data after fetching
+        const res = await axios.get('http://localhost:8800/shoes');
+        setShoes(res.data);
       } catch (err) {
-        console.log(err);
+        console.error('Error fetching shoes:', err);
       }
     };
     fetchAllShoes();
-  }, []); // Empty dependency array to run once on component mount
+  }, []);
 
-  // Apply sorting logic when shoes or sortOption changes
+  // Fetch user data based on userID
   useEffect(() => {
-    let filteredShoes = [...shoes]; // Create a shallow copy to avoid mutation
-
-    // Apply filtering for out-of-stock shoes based on selected sortOption
-    if (sortOption === '0stock') {
-      filteredShoes = filteredShoes.filter(shoe => shoe.stock === 0); // Only out of stock shoes
+    if (userID) {
+      const token = localStorage.getItem('token'); // Get the token from localStorage
+      
+      const fetchUserData = async () => {
+        try {
+          const res = await axios.get(`http://localhost:8800/home/${userID}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token in the Authorization header
+            },
+            
+          });
+          setUserName(res.data.name);
+          
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          if (err.response) {
+            // This is the response from the server, contains status and data
+            console.error('Response error status:', err.response.status);
+            console.error('Response error data:', err.response.data);
+          } else if (err.request) {
+            // The request was made, but no response was received
+            console.error('Request error:', err.request);
+          } else {
+            // Some error occurred setting up the request
+            console.error('Error message:', err.message);
+          }
+        }
+      };
+      fetchUserData();
     }
+  }, [userID]);
 
-    // Apply sorting based on selected option
-    if (sortOption === 'lprice') {
-      filteredShoes.sort((a, b) => a.price - b.price); // Sort by price (ascending)
+  // Sort shoes based on the selected option
+  useEffect(() => {
+    let filteredShoes = [...shoes];
+
+    if (sortOption === '0stock') {
+      filteredShoes = filteredShoes.filter((shoe) => shoe.stock === 0);
+    } else if (sortOption === 'lprice') {
+      filteredShoes.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'hprice') {
-      filteredShoes.sort((a, b) => b.price - a.price); // Sort by price (descending)
+      filteredShoes.sort((a, b) => b.price - a.price);
     } else if (sortOption === 'stock') {
-      filteredShoes.sort((a, b) => b.stock - a.stock); // Sort by stock (descending)
+      filteredShoes.sort((a, b) => b.stock - a.stock);
     } else if (sortOption === 'price and stock') {
       filteredShoes.sort((a, b) => {
-        if (a.stock === 0 && b.stock === 0) {
-          return b.price - a.price; // If both are out of stock, sort by price (descending)
-        } else if (a.stock === 0) {
-          return 1; // Out of stock comes last
-        } else if (b.stock === 0) {
-          return -1; // Out of stock comes last
-        }
-        return a.price - b.price; // If both have stock, sort by price (ascending)
+        if (a.stock === 0 && b.stock === 0) return b.price - a.price;
+        if (a.stock === 0) return 1;
+        if (b.stock === 0) return -1;
+        return a.price - b.price;
       });
     }
 
-    setSortedShoes(filteredShoes); // Update sorted shoes
-  }, [shoes, sortOption]); // Only re-sort when shoes or sortOption changes
+    setSortedShoes(filteredShoes);
+  }, [shoes, sortOption]);
 
-  // Filter shoes based on the search query
-  const filteredShoes = sortedShoes.filter(shoe => 
-    shoe.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  // Filter shoes based on search query
+  const filteredShoes = sortedShoes.filter((shoe) =>
+    shoe.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     shoe.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Delete a shoe
-  const handleDelete = async (id) => {
+  // Add item to cart
+  const addItemToCart = async (shoeId) => {
     try {
-      // Send DELETE request to remove the product
-      await axios.delete(`http://localhost:8800/shoes/${id}`);
-      
-      // Re-fetch the updated shoes data after deletion
-      const res = await axios.get("http://localhost:8800/shoes");
-      setShoes(res.data); // Update the state with the newly fetched shoe list
-    } catch (err) {
-      console.error("Error deleting shoe:", err);
+      if (!userId) {
+        console.error('User not logged in');
+        return;
+      }
+      await axios.post('http://localhost:8800/cart/add', {
+        userId,
+        shoeId,
+        quantity: 1, // Default quantity to 1
+      });
+      alert('Item added to cart!');
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
     }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login'); // Redirect to login page
   };
 
   return (
     <div>
-      <h1>HOME</h1>
+      <h1>Home</h1>
+      <p>Welcome, {userName}!</p>
 
-      {/* Sorting options */}
       <div>
-        <label htmlFor="sortOption">Sort by: </label>
+        <label htmlFor="sortOption">Sort by:</label>
         <select
           id="sortOption"
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
-          <option value="select">Select</option>
           <option value="lprice">Lowest Price</option>
           <option value="hprice">Highest Price</option>
           <option value="stock">Available Stock</option>
@@ -94,9 +133,8 @@ const Shoes = () => {
         </select>
       </div>
 
-      {/* Search Input */}
       <div>
-        <label htmlFor="searchQuery">Search: </label>
+        <label htmlFor="searchQuery">Search:</label>
         <input
           id="searchQuery"
           type="text"
@@ -106,51 +144,40 @@ const Shoes = () => {
         />
       </div>
 
-      {/* Warning for low stock */}
       {shoes.some((shoe) => shoe.stock > 0 && shoe.stock <= 5) && (
         <p style={{ color: 'red', fontWeight: 'bold' }}>
           Warning: Some products have low stocks!
         </p>
       )}
 
-      <div className='shoes'>
+      <div className="shoes">
         {filteredShoes.map((shoe) => (
           <div
-            className='shoe'
+            className="shoe"
             key={shoe.id}
             style={{
               backgroundColor: shoe.stock === 0 ? '#d3d3d3' : 'white',
               opacity: shoe.stock === 0 ? 0.6 : 1,
             }}
           >
-            {shoe.image && <img src={shoe.image} alt="" style={{ opacity: shoe.stock === 0 ? 0.6 : 1 }} />}
-
+            {shoe.image && <img src={shoe.image} alt={shoe.prod_name} />}
             <h2>{shoe.prod_name}</h2>
             <p>{shoe.prod_description}</p>
-            <span>Price: {shoe.price}</span>
-
+            <span>Price: ${shoe.price}</span>
             <span style={{ color: shoe.stock < 10 ? 'red' : 'black' }}>
               Stock: {shoe.stock}
             </span>
-
-            {shoe.stock === 0 && (
-              <p style={{ color: 'gray', fontWeight: 'bold' }}>Out of Stock</p>
-            )}
-
-            <button className='delete' onClick={() => handleDelete(shoe.id)}>
-              Delete
-            </button>
-            <button className='update'>
-              <Link to={`/update/${shoe.id}`}>Update</Link>
-            </button>
+            <div>
+              <button onClick={() => addItemToCart(shoe.id)}>Add to Cart</button>
+            </div>
           </div>
         ))}
       </div>
 
       <button>
-        <Link to="/add">Add new Shoes</Link>
+        <Link to="/cart">Show Cart</Link>
       </button>
-      <button><Link to="/login">Log in</Link></button>
+      <button onClick={handleLogout}>Log Out</button>
     </div>
   );
 };
