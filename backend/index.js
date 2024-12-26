@@ -94,7 +94,7 @@ app.post("/login", (req, res) => {
                     role: user.role,
                     name: user.name,
                 },
-                "your-secret-key", // Replace with a strong secret key
+                "your-secret-key", // password key
                 { expiresIn: "1h" } // Token expiry time
             );
 
@@ -173,6 +173,25 @@ app.get("/home/:userId", isAuthenticated, (req, res) => {
     });
 });
 
+app.get("/user/:userId", isAuthenticated, (req, res) => {
+    const userId = req.params.userId;
+    const userQuery = `SELECT * FROM users WHERE userID = ?`;
+
+    db.query(userQuery, [userId], (err, userResults) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ error: "Failed to fetch user details", details: err });
+        }
+        if (userResults.length === 0) {
+            console.warn(`User with ID ${userId} not found`);
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Assuming you only need the first user from the results array
+        console.log("User fetched successfully:", userResults[0]);
+        res.status(200).json(userResults[0]);  // Sending the user data back
+    });
+});
 
 
 app.post("/shoes", (req, res) => {
@@ -325,3 +344,30 @@ app.post('/cart/add', (req, res) => {
     });
   });
   
+// Remove user
+app.delete('/user/remove/:userID', (req, res) => {
+    const userID = req.params.userID;
+
+    const deleteCartItems = `DELETE FROM cart_items WHERE user_id = ?`;
+    const deleteUser = `DELETE FROM users WHERE userID = ?`;
+
+    db.query(deleteCartItems, [userID], (err) => {
+        if (err) {
+            console.error('Error deleting cart items:', err.message);
+            return res.status(500).json({ error: 'Failed to delete cart items' });
+        }
+
+        db.query(deleteUser, [userID], (err, result) => {
+            if (err) {
+                console.error('Error deleting user:', err.message);
+                return res.status(500).json({ error: 'Failed to delete user' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            res.status(200).json({ message: 'Account deleted successfully' });
+        });
+    });
+});

@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Shoes = () => {
-  const { userID } = useParams(); // Retrieve userID from the URL
   const navigate = useNavigate(); // For navigating to other pages
   const [shoes, setShoes] = useState([]);
   const [sortOption, setSortOption] = useState('price');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortedShoes, setSortedShoes] = useState([]);
   const [userName, setUserName] = useState(localStorage.getItem('name') || '');
-  const userId = localStorage.getItem('userID'); // Ensure userId is available
+  const userId = localStorage.getItem('userID'); // Retrieve userID from localStorage
 
   // Fetch all shoes data
   useEffect(() => {
@@ -25,39 +24,29 @@ const Shoes = () => {
     fetchAllShoes();
   }, []);
 
-  // Fetch user data based on userID
+  // Fetch user data based on userID from localStorage
   useEffect(() => {
-    if (userID) {
+    if (userId) {
       const token = localStorage.getItem('token'); // Get the token from localStorage
       
       const fetchUserData = async () => {
         try {
-          const res = await axios.get(`http://localhost:8800/home/${userID}`, {
+          const res = await axios.get(`http://localhost:8800/home/${userId}`, {
             headers: {
               Authorization: `Bearer ${token}`, // Add the token in the Authorization header
             },
-            
           });
-          setUserName(res.data.name);
-          
+          setUserName(res.data.name); // Set user name from API response
         } catch (err) {
           console.error('Error fetching user data:', err);
-          if (err.response) {
-            // This is the response from the server, contains status and data
-            console.error('Response error status:', err.response.status);
-            console.error('Response error data:', err.response.data);
-          } else if (err.request) {
-            // The request was made, but no response was received
-            console.error('Request error:', err.request);
-          } else {
-            // Some error occurred setting up the request
-            console.error('Error message:', err.message);
-          }
         }
       };
       fetchUserData();
+    } else {
+      console.error('User ID not found in localStorage');
+      navigate('/login'); // Redirect to login page if userID is not available
     }
-  }, [userID]);
+  }, [userId, navigate]);
 
   // Sort shoes based on the selected option
   useEffect(() => {
@@ -112,6 +101,20 @@ const Shoes = () => {
     localStorage.clear();
     navigate('/login'); // Redirect to login page
   };
+
+  // Go to the user page
+
+const goToUserPage = () => {
+  const userID = localStorage.getItem('userID'); // Retrieve userID from localStorage
+  const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+  // Check if userID and token exist in localStorage
+  if (userID && token) {
+    navigate('/user'); // Navigate to user page 
+  } else {
+    navigate('/login'); // If not authenticated, go to login page
+  }
+};
 
   return (
     <div>
@@ -178,6 +181,8 @@ const Shoes = () => {
         <Link to="/cart">Show Cart</Link>
       </button>
       <button onClick={handleLogout}>Log Out</button>
+
+      <button onClick={goToUserPage}>Go to User Page</button>
     </div>
   );
 };

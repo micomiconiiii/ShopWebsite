@@ -35,8 +35,8 @@ const Login = () => {
                 navigate("/"); // Redirect to admin dashboard
             } else {
                 
-                alert(`${userID}`);
-                navigate(`/home/${userID}`); // Pass userID as a URL parameter to home
+                alert("Welcome back " + name+"!");
+                navigate('/home'); 
             }
         } catch (err) {
             console.error(err);
