@@ -60,7 +60,9 @@ const Shoes = () => {
   const addItemToCart = async (shoeId) => {
     try {
       if (!userId) {
-        console.error('User not logged in');
+        alert('User not logged in');
+        console.log('User must log in first');
+        
         return;
       }      // Fetch the shoe details (including the price) based on shoeId
       const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
@@ -105,7 +107,7 @@ const goToUserPage = () => {
   return (
     <div>
       <h1>Home</h1>
-      <p>Welcome, {userName}!</p>
+      <p>Welcome, {userName || "Guest"}!</p>
 
       <div>
         <label htmlFor="sortOption">Sort by:</label>
@@ -166,8 +168,16 @@ const goToUserPage = () => {
       <button>
         <Link to="/cart">Show Cart</Link>
       </button>
-      <button onClick={handleLogout}>Log Out</button>
-
+      {!userName ? (
+              <button>
+              <Link to="/login">Log in</Link>
+              </button>
+              ) : (
+              
+              <button onClick={handleLogout}>
+              Log out
+              </button>
+        )}
       <button onClick={goToUserPage}>Go to User Page</button>
     </div>
   );

@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken"; // for generating JWT
 import cors from 'cors';
 import session from 'express-session';
 const app = express();
-const SECRET_KEY = 'your_secret_key'; // secret for JWT
 
 
 
@@ -34,43 +33,64 @@ const db = mysql.createConnection({
 });
 
 // Registration Route
-app.post("/register", async (req, res) => {
+app.post("/register", (req, res) => {
     const { name, email, password, role } = req.body;
 
+    // Validate input
     if (!name || !email || !password || !role) {
         return res.status(400).json({ error: "All fields are required" });
     }
 
-    try {
-        // Hash password before storing it in the database
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
+    // Hash the password
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+        if (err) {
+            console.error("Error during password hashing:", err);
+            return res.status(500).json({ error: "Error during password hashing" });
+        }
+
+        // Insert the new user into the database
         const query = "INSERT INTO users (name, email, password, created_at, role) VALUES (?)";
         const values = [name, email, hashedPassword, new Date(), role];
 
-        db.query(query, [values], (err, data) => {
+        db.query(query, [values], (err, result) => {
             if (err) {
                 console.error("Error while registering the user:", err);
                 return res.status(500).json({ error: "Error while registering the user" });
             }
 
             // Retrieve the auto-incremented userID
-            const userID = data.insertId;
+            const userID = result.insertId;
 
-            // Send back the userID and role in the response
+            // Generate a JWT token
+            const token = jwt.sign(
+                {
+                    id: userID,
+                    role: role,
+                    name: name,
+                },
+                "your-secret-key", // Replace with your secret key
+                { expiresIn: "1h" }
+            );
+
+            // Store user data in session if needed (optional)
+            req.session.user = {
+                id: userID,
+                name: name,
+                role: role,
+            };
+
+            // Return the token and user details to the client
             return res.status(200).json({
                 message: "User registered successfully",
                 userID: userID,
-                name: name,
-                role: role
+                userName: name,
+                role: role,
+                token,
             });
         });
-
-    } catch (error) {
-        console.error("Error during password hashing:", error);
-        return res.status(500).json({ error: "Error during password hashing" });
-    }
+    });
 });
+
 
 
 app.post("/login", (req, res) => {

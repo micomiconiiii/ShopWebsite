@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -72,6 +72,10 @@ const Login = () => {
                     Login
                 </button>
                 {error && <p style={{ color: "red" }}>{error}</p>}
+                <div>
+                    <p>No account yet?</p>
+                    <button><Link to = "/register">Register Here</Link></button>
+                </div>
             </form>
         </div>
     );
