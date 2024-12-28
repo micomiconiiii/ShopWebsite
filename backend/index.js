@@ -117,6 +117,28 @@ app.post("/login", (req, res) => {
         });
     });
 });
+app.put("/user/update-password/:userId", (req, res) => {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
+
+    // Hash the new password
+    bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+        if (err) return res.status(500).json({ error: "Error hashing password" });
+
+        // Update the password in the database
+        const query = "UPDATE users SET password = ? WHERE userID = ?";
+        db.query(query, [hashedPassword, userId], (err, results) => {
+            if (err) return res.status(500).json({ error: "Database error" });
+
+            if (results.affectedRows > 0) {
+                return res.json({ success: true, message: "Password updated successfully" });
+            } else {
+                return res.status(400).json({ error: "Failed to update password" });
+            }
+        });
+    });
+});
+
 
 app.post("/logout", (req, res) => {
     req.session.destroy(err => {
@@ -154,7 +176,7 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-app.get("/home/:userId", isAuthenticated, (req, res) => {
+app.get("/home", isAuthenticated, (req, res) => {
     const userId = req.params.userId;
     const userQuery = `SELECT * FROM users WHERE userID = ?`;
 
@@ -173,34 +195,82 @@ app.get("/home/:userId", isAuthenticated, (req, res) => {
     });
 });
 
-app.get("/user/:userId", isAuthenticated, (req, res) => {
-    const userId = req.params.userId;
-    const userQuery = `SELECT * FROM users WHERE userID = ?`;
+app.post("/user/verify-password", (req, res) => {
+    const { userId, password } = req.body;
 
-    db.query(userQuery, [userId], (err, userResults) => {
+    // Validate input
+    if (!userId || !password) {
+        return res.status(400).json({ error: "User ID and password are required" });
+    }
+
+    // Define the query to fetch the stored password for the given user ID
+    const query = "SELECT password FROM users WHERE userID = ?";
+
+    // Execute the query
+    db.query(query, [userId], (err, results) => {
         if (err) {
-            console.error("Database Error:", err);
-            return res.status(500).json({ error: "Failed to fetch user details", details: err });
+            console.error("Database error during password verification:", err);
+            return res.status(500).json({ error: "Database error" });
         }
-        if (userResults.length === 0) {
-            console.warn(`User with ID ${userId} not found`);
+
+        // Check if the user exists
+        if (results.length === 0) {
+            console.error(`User not found with userId: ${userId}`);
             return res.status(404).json({ error: "User not found" });
         }
 
-        // Assuming you only need the first user from the results array
+        const storedPassword = results[0].password;
+        
+        // Compare the provided password with the stored password
+        bcrypt.compare(password, storedPassword, (err, isMatch) => {
+            if (err) {
+                console.error("Error during bcrypt comparison:", err);
+                return res.status(500).json({ error: "Password comparison failed" });
+            }
+
+            // If passwords don't match
+            if (!isMatch) {
+                console.error(`Password mismatch for userId: ${userId}`);
+                return res.status(401).json({ error: "Invalid password" });
+            }
+
+            // If passwords match, return success
+            console.log(`Password verified successfully for userId: ${userId}`);
+            return res.status(200).json({ success: true });
+        });
+    });
+});
+
+app.get("/user/:userId", isAuthenticated, (req, res) => {
+    const userId = req.params.userId;
+    console.log("Received request to fetch user:", userId);
+
+    const userQuery = `SELECT * FROM users WHERE userID = ?`;
+    db.query(userQuery, [userId], (err, userResults) => {
+        if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).json({ error: "Failed to fetch user details" });
+        }
+        if (!userResults.length) {
+            console.warn(`User with ID ${userId} not found`);
+            return res.status(404).json({ error: `User with ID ${userId} not found` });
+        }
+
         console.log("User fetched successfully:", userResults[0]);
-        res.status(200).json(userResults[0]);  // Sending the user data back
+        res.status(200).json(userResults[0]);
     });
 });
 
 
+
 app.post("/shoes", (req, res) => {
-    const q = "INSERT INTO shoes (`prod_name`, `prod_description`, `image`, `price`) VALUES (?)";
+    const q = "INSERT INTO shoes (`prod_name`, `prod_description`, `image`, `price`, `stock`) VALUES (?)";
     const values = [
         req.body.prod_name,
         req.body.prod_description,
         req.body.image,
-        req.body.price
+        req.body.price,
+        req.body.stock
     ];
 
     db.query(q, [values], (err, data) => {
@@ -304,15 +374,39 @@ app.get("/shoes/:id", (req, res) => {
 
 
 // cart class
-// Add item to cart
+// Add item to cart or update existing item
 app.post('/cart/add', (req, res) => {
-    const { userId, shoeId, quantity } = req.body;
-    const sql = `INSERT INTO cart_items (user_id, shoe_id, quantity) VALUES (?, ?, ?)`;
-    db.query(sql, [userId, shoeId, quantity], (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.status(201).json({ message: 'Item added to cart' });
+    const { userId, shoeId, quantity, cost } = req.body;
+
+    // Check if the user already has this shoe in their cart
+    const checkSql = `SELECT * FROM cart_items WHERE user_id = ? AND shoe_id = ?`;
+    db.query(checkSql, [userId, shoeId], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (result.length > 0) {
+            // If the shoe is already in the cart, update the quantity
+            const newQuantity = result[0].quantity + quantity;
+            const newCost = result[0].cost * newQuantity;
+            const updateSql = `UPDATE cart_items SET quantity = ?, cost = ? WHERE user_id = ? AND shoe_id = ?`;
+            db.query(updateSql, [newQuantity, newCost, userId, shoeId], (err, updateResult) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.status(200).json({ message: 'Cart item updated' });
+            console.log('New Quantity:', newQuantity);
+            console.log('New Cost:', newCost);
+
+            });
+
+        } else {
+            // If the shoe is not in the cart, insert it as a new item
+            const insertSql = `INSERT INTO cart_items (user_id, shoe_id, quantity, cost) VALUES (?, ?, ?, ?)`;
+            db.query(insertSql, [userId, shoeId, quantity, cost], (err, insertResult) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.status(201).json({ message: 'Item added to cart' });
+            });
+        }
     });
-  });
+});
+
   
   // Get cart items for a user
   app.get('/cart/:userId', (req, res) => {
@@ -325,15 +419,29 @@ app.post('/cart/add', (req, res) => {
   });
   
   // Update cart item
-  app.put('/cart/update', (req, res) => {
-    const { userId, shoeId, quantity } = req.body;
-    const sql = `UPDATE cart_items SET quantity = ? WHERE user_id = ? AND shoe_id = ?`;
-    db.query(sql, [quantity, userId, shoeId], (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.status(200).json({ message: 'Cart item updated' });
+app.put('/cart/update', (req, res) => {
+    const { userId, shoeId, quantity, cost } = req.body;
+
+    // Ensure all required fields are available
+    if (typeof quantity !== 'number' || typeof cost !== 'number') {
+        return res.status(400).json({ error: 'Invalid quantity or cost' });
+    }
+
+    const updateSql = `UPDATE cart_items SET quantity = ?, cost = ? WHERE user_id = ? AND shoe_id = ?`;
+
+    // Execute the update query with the correct values
+    db.query(updateSql, [quantity, cost, userId, shoeId], (err, updateResult) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Check if any rows were affected (i.e., the update was successful)
+        if (updateResult.affectedRows === 0) {
+            return res.status(404).json({ message: 'Item not found in cart' });
+        }
+
+        res.status(200).json({ message: 'Cart item updated' });
     });
-  });
-  
+});
+
   // Remove item from cart
   app.delete('/cart/remove', (req, res) => {
     const { userId, shoeId } = req.body;
@@ -369,5 +477,33 @@ app.delete('/user/remove/:userID', (req, res) => {
 
             res.status(200).json({ message: 'Account deleted successfully' });
         });
+    });
+});
+
+// order
+
+app.post("/orders", (req, res) => {
+    const { userID, orderDate, status, items, totalAmount, shippingAddress } = req.body;
+
+    // Ensure orderDate is a valid format (convert to ISO string if necessary)
+    const formattedOrderDate = new Date(orderDate).toISOString().slice(0, 19).replace('T', ' ');
+
+    const q = "INSERT INTO orders (userID, orderDate, status, items, totalAmount, shippingAddress) VALUES (?, ?, ?, ?, ?, ?)";
+    const values = [
+        userID,
+        formattedOrderDate,  // Ensure it's a valid ISO string
+        status,
+        JSON.stringify(items),  // Store items as a JSON string
+        totalAmount,
+        shippingAddress,
+    ];
+
+    db.query(q, values, (err, data) => {
+        if (err) {
+            console.error('Error during order creation:', err);  // Log the actual error
+            return res.status(500).json({ error: "Error creating order", details: err.message });
+        }
+
+        return res.status(200).json({ message: "Order created successfully", orderID: data.insertId });
     });
 });

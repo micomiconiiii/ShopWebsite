@@ -17,7 +17,7 @@ const Add =()=>{
         setShoe((prev)=>({...prev, [e.target.name]: e.target.value}))
     };
     
-    const handleClick= async e=>{
+    const handleAddProduct= async e=>{
         e.preventDefault()
         try{
             await axios.post("http://localhost:8800/shoes", shoe) // axios allows to communicate with API in react, makes http request
@@ -27,7 +27,7 @@ const Add =()=>{
         }
     }
     
-    console.log(shoe)
+    
     return(
         <div className ='form'>
             <h1>Add</h1>
@@ -37,7 +37,8 @@ const Add =()=>{
             <input type="number" placeholder='Stock' onChange={handleChange} name="stock"/>
             <input type="text" placeholder='Image' onChange={handleChange} name="image" />
             
-            <button onClick={handleClick}>Add</button>
+            <button onClick={handleAddProduct}>Add</button>
+            
         </div>
     ) 
 }

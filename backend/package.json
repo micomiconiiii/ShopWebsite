@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@react-google-maps/api": "^2.20.5",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",

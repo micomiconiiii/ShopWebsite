@@ -25,29 +25,7 @@ const Shoes = () => {
   }, []);
 
   // Fetch user data based on userID from localStorage
-  useEffect(() => {
-    if (userId) {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
-      
-      const fetchUserData = async () => {
-        try {
-          const res = await axios.get(`http://localhost:8800/home/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`, // Add the token in the Authorization header
-            },
-          });
-          setUserName(res.data.name); // Set user name from API response
-        } catch (err) {
-          console.error('Error fetching user data:', err);
-        }
-      };
-      fetchUserData();
-    } else {
-      console.error('User ID not found in localStorage');
-      navigate('/login'); // Redirect to login page if userID is not available
-    }
-  }, [userId, navigate]);
-
+  
   // Sort shoes based on the selected option
   useEffect(() => {
     let filteredShoes = [...shoes];
@@ -84,11 +62,19 @@ const Shoes = () => {
       if (!userId) {
         console.error('User not logged in');
         return;
+      }      // Fetch the shoe details (including the price) based on shoeId
+      const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
+      const shoe = response.data;
+
+      if (!shoe || !shoe.price) {
+          console.error('Shoe data is invalid or missing price');
+          return;
       }
       await axios.post('http://localhost:8800/cart/add', {
         userId,
         shoeId,
         quantity: 1, // Default quantity to 1
+        cost: shoe.price
       });
       alert('Item added to cart!');
     } catch (error) {

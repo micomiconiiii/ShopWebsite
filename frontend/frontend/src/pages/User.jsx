@@ -1,105 +1,133 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const User = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('');
+    const [currentPassword, setCurrentPassword] = useState(""); // For current password
+    const [newPassword, setNewPassword] = useState(""); // For new password
+    const [confirmPassword, setConfirmPassword] = useState(""); // For confirming the new password
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // Retrieve the userID from localStorage
+    const [successMessage, setSuccessMessage] = useState(null);
+    
+    // Retrieve the userID and token from localStorage
     const userID = localStorage.getItem('userID'); 
     const token = localStorage.getItem('token');
+
     useEffect(() => {
-        // If there's no userID in localStorage, navigate to login page
-        if (!userID) {
-            navigate('/login');
-            return;
-        }
-
-        const token = localStorage.getItem('token'); // Get the token from localStorage
-
-        // If no token is found, redirect to the login page
-        if (!token) {
+        if (!userID || !token) {
             navigate('/login');
             return;
         }
 
         const fetchUserData = async () => {
             try {
-                setLoading(true);  // Set loading state
+                setLoading(true);
                 const res = await axios.get(`http://localhost:8800/user/${userID}`, {
                     headers: {
-                        Authorization: `Bearer ${token}`,  // Add the token in the Authorization header
+                        Authorization: `Bearer ${token}`,
                     },
                 });
 
-                setUserName(res.data.name);  // Set the user name after fetching data
-                setLoading(false);  // Stop loading
+                setUserName(res.data.name);
+                setLoading(false);
             } catch (err) {
-                console.error('Error fetching user data:', err);
                 setLoading(false);
                 setError('Failed to fetch user data');
+                console.log(err);
             }
         };
 
         fetchUserData();
-    }, [userID, navigate]);
+    }, [userID, navigate, token]);
 
     // Handle logout
     const handleLogout = () => {
-        localStorage.clear();  // Clear localStorage
-        navigate('/login');  // Redirect to login page
+        localStorage.clear();
+        navigate('/login');
     };
 
+    // Handle password reset
+    const handleResetPassword = async () => {
+        if (newPassword !== confirmPassword) {
+            setError("New password and confirmation don't match");
+            return;
+        }
+
+        try {
+          console.log('Sending verify password request');  // Debugging log
+          console.log(currentPassword);  // Debugging log
+          console.log(userID);
+          // Step 1: Verify current password using the JWT token
+            const response = await axios.post("http://localhost:8800/user/verify-password", {
+                userId: userID,
+                password: currentPassword,  // Send currentPassword as part of the request
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`  // Ensure the token is included here
+                }
+            });
+            console.log('verify password request done');  // Debugging log
+  
+            if (response.data.success) {
+                // Step 2: Proceed to update the password
+                const updateResponse = await axios.put(
+                    `http://localhost:8800/user/update-password/${userID}`,
+                    {
+                        newPassword
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`  // Include token for authentication
+                        }
+                    }
+                );
+
+                if (updateResponse.data.success) {
+                    setSuccessMessage("Password updated successfully!");
+                    setCurrentPassword("");  // Clear the fields
+                    setNewPassword("");
+                    setConfirmPassword("");
+                } else {
+                    setError("Failed to update password");
+                }
+            } else {
+                setError("Current password is incorrect");
+            }
+        } catch (err) {
+            console.error("Error: ", err.message);  // Log the error for more details
+            setError('An error occurred while resetting the password');
+        }
+    };
+
+    // Handle account deletion
     const handleDeleteAccount = async () => {
         try {
-          // Retrieve the token from localStorage
-          const token = localStorage.getItem('token');
-      
-          // Ensure token exists
-          if (!token) {
-            console.error('Token not found');
-            return;
-          }
-      
-          // Retrieve the userID from localStorage
-          const userID = localStorage.getItem('userID');
-      
-          // Ensure userID exists
-          if (!userID) {
-            console.error('User ID not found');
-            return;
-          }
-          
-          // Send DELETE request with userID in the URL and token in the headers
-          await axios.delete(`http://localhost:8800/user/remove/${userID}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,  // Add token to the headers
-            },
-          });
-      
-          alert('Account deleted successfully');
-          localStorage.clear();  // Clear localStorage
-          navigate('/login');  // Redirect to login page
-    
-        } catch (error) {
-          console.error('Error deleting account', error);
-          if (error.response) {
-            // Log the error response for more details
-            console.error('Error response:', error.response.data);
-          }
-        }
-      };
-      
+            console.log('Token:', token);
 
-    // Show loading message if still loading
+            await axios.delete(`http://localhost:8800/user/remove/${userID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert('Account deleted successfully');
+            localStorage.clear();
+            navigate('/login');
+        } catch (error) {
+            console.error('Error deleting account', error);
+            if (error.response) {
+                console.error('Error response:', error.response.data);
+            }
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
-    // Show error message if fetching user data fails
     if (error) {
         return <div>Error: {error}</div>;
     }
@@ -110,10 +138,37 @@ const User = () => {
             <h2>Name: {userName}</h2>
             <h2>User ID: {userID}</h2>
 
+            <div>
+                <h3>Reset Password</h3>
+                <input
+                    type="password"
+                    placeholder="Enter current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+                    
+                <input
+                    type="password"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <input
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button onClick={handleResetPassword}>Reset Password</button>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+            </div>
+
             <button onClick={handleLogout}>Log Out</button>
             <button onClick={handleDeleteAccount} style={{ backgroundColor: 'red', color: 'white' }}>
                 Delete Account
             </button>
+            <button><Link to="/home">Back</Link></button>
         </div>
     );
 };
