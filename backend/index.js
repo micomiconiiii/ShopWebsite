@@ -527,3 +527,62 @@ app.post("/orders", (req, res) => {
         return res.status(200).json({ message: "Order created successfully", orderID: data.insertId });
     });
 });
+app.get("/orders", (req, res) => {
+    const q = "SELECT * FROM orders"; // Query to retrieve all orders from the database
+    
+    db.query(q, (err, data) => {
+        if (err) {
+            console.error('Error retrieving orders:', err);
+            return res.status(500).json({ error: "Error retrieving orders", details: err.message });
+        }
+
+        return res.status(200).json({ orders: data });
+    });
+});
+
+app.delete("/orders/remove/:orderID", (req, res) =>{
+    const orderID = req.params.orderID;
+    const sql = "DELETE FROM orders WHERE orderID = ?";
+
+    db.query(sql, orderID, (err)=>{
+        if (err) return res.status(500).json({ orderID });
+      res.status(200).json({ message: 'Item removed from cart' });
+    });
+});
+app.put('/orders/update-item/:orderID', (req, res) => {
+    const orderID = req.params.orderID;
+    const { status, shippingAddress } = req.body;
+
+    console.log('Received data:', req.body); // Log request body
+    console.log('Updating order with ID:', orderID); // Log order ID
+    
+    const query = 'SELECT * FROM orders WHERE orderID = ?';
+
+    db.query(query, [orderID], (err, results) => {
+        if (err) {
+            console.error('Error fetching order', err);
+            return res.status(500).json({ message: 'Server error while fetching order' });
+        }
+
+        if (results.length === 0) {
+            console.error('Order not found:', orderID);
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const order = results[0];
+        console.log('Fetched order:', order); // Log fetched order
+
+        // Update only the provided fields
+        const updateQuery = 'UPDATE orders SET status = ?, shippingAddress = ? WHERE orderID = ?';
+        db.query(updateQuery, [status || order.status, shippingAddress || order.shippingAddress, orderID], (updateErr) => {
+            if (updateErr) {
+                console.log(status);
+                console.error('Error updating order', updateErr);
+                return res.status(500).json({ message: 'Server error while updating order' });
+            }
+            
+
+            res.status(200).json({ message: 'Order updated successfully' });
+        });
+    });
+});
