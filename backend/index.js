@@ -527,10 +527,25 @@ app.post("/orders", (req, res) => {
         return res.status(200).json({ message: "Order created successfully", orderID: data.insertId });
     });
 });
+
 app.get("/orders", (req, res) => {
-    const q = "SELECT * FROM orders"; // Query to retrieve all orders from the database
+    const q = `
+        SELECT orders.*, users.name 
+        FROM orders
+        JOIN users ON orders.userID = users.userID
+    `; // Query to retrieve all orders and corresponding user names
     
     db.query(q, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    });
+});
+
+app.get("/orders/:userId", (req, res) => {
+    const userId = req.params.userId;
+    const q = `SELECT * FROM orders WHERE userId = ?`; // Query to retrieve all orders from the database
+    
+    db.query(q, userId, (err, data) => {
         if (err) {
             console.error('Error retrieving orders:', err);
             return res.status(500).json({ error: "Error retrieving orders", details: err.message });
@@ -555,7 +570,7 @@ app.put('/orders/update-item/:orderID', (req, res) => {
 
     console.log('Received data:', req.body); // Log request body
     console.log('Updating order with ID:', orderID); // Log order ID
-    
+
     const query = 'SELECT * FROM orders WHERE orderID = ?';
 
     db.query(query, [orderID], (err, results) => {
@@ -580,9 +595,74 @@ app.put('/orders/update-item/:orderID', (req, res) => {
                 console.error('Error updating order', updateErr);
                 return res.status(500).json({ message: 'Server error while updating order' });
             }
-            
+
+            // Check if the order status is "Delivered"
+            if (status === 'Delivered') {
+                // Assuming the order contains a JSON array of items with product names and quantities
+                const items = JSON.parse(order.items); // Make sure your items are in the correct format
+
+                // Loop through each item and update stock
+                items.forEach(item => {
+                    const { prod_name, quantity } = item;
+
+                    // Check and update stock in the product table
+                    const stockQuery = 'SELECT stock FROM shoes WHERE prod_name = ?';
+                    db.query(stockQuery, [prod_name], (stockErr, stockResults) => {
+                        if (stockErr) {
+                            console.error('Error fetching product stock:', stockErr);
+                        } else if (stockResults.length > 0) {
+                            const currentStock = stockResults[0].stock;
+
+                            // Update the product stock by deducting the order quantity
+                            const newStock = currentStock - quantity;
+
+                            const updateStockQuery = 'UPDATE products SET stock = ? WHERE prod_name = ?';
+                            db.query(updateStockQuery, [newStock, prod_name], (updateStockErr) => {
+                                if (updateStockErr) {
+                                    console.error('Error updating stock:', updateStockErr);
+                                } else {
+                                    console.log(`Stock updated for ${prod_name}. New stock: ${newStock}`);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
 
             res.status(200).json({ message: 'Order updated successfully' });
         });
     });
 });
+// Correct route for updating stock by productID
+app.put('/orders/update-stock/:productID', async (req, res) => {
+    try {
+        const { productID } = req.params;
+        const { quantity } = req.body;
+
+        if (!quantity) {
+            console.error('Quantity is required');
+            return res.status(400).send('Quantity is required');
+        }
+
+        // Assuming you have a product model or database query
+        const product = await Product.findById(productID); // Replace with your DB query or mock data lookup
+        if (!product) {
+            console.error(`Product with ID ${productID} not found`);
+            return res.status(404).send('Product not found');
+        }
+
+        // Logic to update stock
+        product.stock += quantity;
+
+        await product.save(); // Save updated stock to DB
+
+        console.log(`Updated stock for product ${productID}: ${product.stock}`);
+        return res.status(200).json({ message: 'Stock updated successfully', stock: product.stock });
+    } catch (error) {
+        console.error('Error updating stock:', error);  // Log detailed error
+        return res.status(500).send('Internal server error');
+    }
+});
+
+
+

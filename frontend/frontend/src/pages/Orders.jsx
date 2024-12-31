@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const OrdersList = () => {
     const [orders, setOrders] = useState([]);
@@ -7,10 +8,11 @@ const OrdersList = () => {
     const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-
+    const [userId] = useState(localStorage.getItem('userID') || ''); // Correctly initialize userId
+        
     useEffect(() => {
         // Fetch orders from the backend when the component mounts
-        axios.get('http://localhost:8800/orders')
+        axios.get(`http://localhost:8800/orders/${userId}`)
             .then((response) => {
                 setOrders(response.data.orders);  // Set the orders state
                 setLoading(false);
@@ -109,8 +111,12 @@ const OrdersList = () => {
                             <button onClick={() => handleUpdate(order.orderID)} className="update-button">
                                 Update Order
                             </button>
+                    
                         </div>
+                        
+                        
                     </div>
+                            
                 );
             })}
     
@@ -132,7 +138,7 @@ const OrdersList = () => {
                         <select name="status" defaultValue={selectedOrder.status}  onChange={(e) => setSelectedOrder({ ...selectedOrder, status: e.target.value })}
  >
                         <option value="Pending">Pending</option>
-                        <option value="Received">Received</option>
+                        <option value="Delivered">Order Received</option>
                         <option value="Shipped">To Be Rated</option>
                         </select></div>
                         
@@ -142,9 +148,14 @@ const OrdersList = () => {
                         </div>
                         <button type="submit">Save Changes</button>
                         <button type="button" onClick={() => setIsUpdating(false)}>Cancel</button>
+                        
                     </form>
                 </div>
             )}
+            <div>        
+                <button type="button"><Link to ="/home">Back</Link></button>
+            </div>
+                    
         </div>
     );
 }

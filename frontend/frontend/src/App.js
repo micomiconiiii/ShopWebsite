@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import User from "./pages/User";
 import Orders from "./pages/Orders";
+import AdminOrder from "./pages/AdminOrder";
 import "./style.css";
 
 function App() {
@@ -30,7 +31,8 @@ function App() {
           <Route path="/home" element={<Home/>}></Route> 
           <Route path="/cart" element={<Cart/>}></Route>        
           <Route path="/user" element={<User/>}></Route>
-          <Route path="/orders" element={<Orders/>}></Route>        
+          <Route path="/orders" element={<Orders/>}></Route>
+          <Route path="/orderdashboard" element={<AdminOrder/>}></Route>        
         
         </Routes>
       </BrowserRouter>

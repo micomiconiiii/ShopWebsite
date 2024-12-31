@@ -7,7 +7,7 @@
     const [sortOption, setSortOption] = useState('price'); // Default sorting by price
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
     const [sortedShoes, setSortedShoes] = useState([]); // Store sorted shoes here
-    const [userName, setUserName] = useState(localStorage.getItem('name') || '');
+    const [userName] = useState(localStorage.getItem('name') || '');
     const navigate = useNavigate(); // For navigating to other pages
       
     // Fetch all shoes data
@@ -155,6 +155,9 @@
 
         <button>
           <Link to="/add">Add new Shoes</Link>
+        </button>
+        <button>
+          <Link to="/orderdashboard">View Order Dashboard</Link>
         </button>
         
         {!userName ? (

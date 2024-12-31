@@ -107,6 +107,10 @@ const Cart = () => {
             alert('Please select at least one item to proceed with the checkout!');
             return;
         }
+        if (!shippingAddress || shippingAddress.trim() === "") {
+            alert('Shipping address is required. Please provide a valid shipping address.');
+            return;
+        }
     
         const orderItems = selectedItemsData.map(item => ({
             productID: item.shoe_id,
@@ -223,6 +227,7 @@ const Cart = () => {
                 <label htmlFor="shippingAddress">Shipping Address:</label>
                 <textarea
                     id="shippingAddress"
+                    required
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)} // Update shipping address state
                     placeholder="Enter your shipping address"
@@ -303,6 +308,10 @@ const Cart = () => {
             <div>
                 <button onClick={handleCheckOut}>Check Out</button>
             </div>
+            <div>        
+                <button type="button"><Link to ="/orders">View Order Status</Link></button>
+            </div>
+                                
         </div>
     );
 };

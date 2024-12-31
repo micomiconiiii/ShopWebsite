@@ -179,7 +179,8 @@ const goToUserPage = () => {
               </button>
         )}
       <button onClick={goToUserPage}>Go to User Page</button>
-    </div>
+      <button type="button"><Link to ="/orders">View Order Status</Link></button>
+      </div>
   );
 };
 
