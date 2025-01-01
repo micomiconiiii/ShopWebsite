@@ -6,6 +6,7 @@ const Cart = () => {
     const Navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [total, setTotal] = useState(0);
+    const [selectedTotal, setSelectedTotal] = useState(0); // Total for selected items
     const [userId] = useState(localStorage.getItem('userID') || ''); // Correctly initialize userId
     const [selectedItems, setSelectedItems] = useState([]); // Track selected items for checkout
     const [shippingAddress, setShippingAddress] = useState(''); // State for shipping address
@@ -14,6 +15,13 @@ const Cart = () => {
     const [paymentMethod, setPaymentMethod] = useState(''); // Cash on delivery, Debit/Credit, or E-wallet
     const [debitCardInfo, setDebitCardInfo] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
     const [eWalletInfo, setEWalletInfo] = useState({ walletId: '', pin: '' });
+    useEffect(() => {
+        const totalAmount = cartItems
+            .filter((item) => selectedItems.includes(item.shoe_id))
+            .reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        setSelectedTotal(totalAmount); // Update the total immediately after selection change
+    }, [selectedItems, cartItems]); // Run this effect whenever selectedItems or cartItems change
 
     useEffect(() => {
         if (userId) { // Only fetch cart items if userId exists
@@ -35,27 +43,36 @@ const Cart = () => {
         const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
         setTotal(totalAmount);
     };
+    // calculate only the checked items
+    const calculateSelectedTotal = (selectedItems) => {
+        const totalAmount = cartItems
+            .filter((item) => selectedItems.includes(item.shoe_id))
+            .reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setSelectedTotal(totalAmount);
+    };
 
+    
     // Update quantity of a cart item when the "+" or "-" button is clicked
     const updateCartItem = async (shoeId, action) => {
         const currentItem = cartItems.find(item => item.shoe_id === shoeId);
         const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
         const shoe = response.data;
-
+        calculateSelectedTotal(selectedItems);
+    
         if (!currentItem || !shoe) return;
-
+    
         let newQuantity = currentItem.quantity;
-
+    
         // Adjust quantity based on action
         if (action === 'increment') {
             newQuantity += 1;
         } else if (action === 'decrement' && newQuantity > 1) {
             newQuantity -= 1;
         }
-
+    
         // Calculate the new cost for the item based on the updated quantity
         const newCost = shoe.price * newQuantity;
-
+    
         try {
             // Send the updated quantity and cost to the backend
             await axios.put('http://localhost:8800/cart/update', {
@@ -64,23 +81,27 @@ const Cart = () => {
                 quantity: newQuantity,
                 cost: newCost
             });
-
+    
             // Update the local state with the new quantity
             setCartItems((prevItems) => {
                 const updatedItems = prevItems.map((item) =>
                     item.shoe_id === shoeId ? { ...item, quantity: newQuantity } : item
                 );
-
+    
                 // Recalculate the total with updated cart items
-                calculateTotal(updatedItems); // Recalculate immediately after state update
-
+                calculateTotal(updatedItems);
+    
+                // Recalculate the total for selected items
+                calculateSelectedTotal(selectedItems);
+    
                 return updatedItems; // Return the updated items to update the state
             });
-
+    
         } catch (error) {
             console.error('Error updating cart item:', error);
         }
     };
+    
 
     // Remove item from cart
     const removeItemFromCart = async (shoeId) => {
@@ -102,7 +123,16 @@ const Cart = () => {
     const handleCheckOut = async () => {
         // Filter selected items from cart based on selectedItems state
         const selectedItemsData = cartItems.filter(item => selectedItems.includes(item.shoe_id));
-    
+        
+        for (let item of selectedItemsData) {
+            const response = await axios.get(`http://localhost:8800/shoes/${item.shoe_id}`);
+            const shoe = response.data;
+            if (shoe.stock < item.quantity) {
+                alert(`Insufficient stock for ${item.prod_name}. Only ${shoe.stock} items are available.`);
+                return; // Stop the checkout process if stock is insufficient
+            }
+        }
+
         if (selectedItemsData.length === 0) {
             alert('Please select at least one item to proceed with the checkout!');
             return;
@@ -148,17 +178,19 @@ const Cart = () => {
         }
     };
 
-    // Handle checkbox change to toggle selection
-    const handleCheckboxChange = (shoeId) => {
-        setSelectedItems((prevSelected) => {
-            if (prevSelected.includes(shoeId)) {
-                return prevSelected.filter(id => id !== shoeId); // Deselect
-            } else {
-                return [...prevSelected, shoeId]; // Select
-            }
-        });
-    };
 
+// Handle checkbox change to toggle selection
+const handleCheckboxChange = (shoeId) => {
+    setSelectedItems((prevSelected) => {
+        if (prevSelected.includes(shoeId)) {
+            return prevSelected.filter((id) => id !== shoeId); // Deselect
+        } else {
+            return [...prevSelected, shoeId]; // Select
+        }
+    });
+};
+
+    
     // Handle payment form submission
     const handleDebitCardSubmit = (e) => {
         e.preventDefault();
@@ -208,7 +240,9 @@ const Cart = () => {
                                     -
                                 </button>
                                 <span>{item.quantity}</span>
-                                <button onClick={() => updateCartItem(item.shoe_id, 'increment')}>+</button>
+                                <button onClick={() => updateCartItem(item.shoe_id, 'increment')}>
+                                    +
+                                </button>
                             </td>
                             <td>${(item.price * item.quantity).toFixed(2)}</td>
                             <td>
@@ -220,6 +254,7 @@ const Cart = () => {
             </table>
             <div>
                 <h2>Total: ${total.toFixed(2)}</h2>
+                <h2>Total for Selected Items: ${selectedTotal.toFixed(2)}</h2>
             </div>
 
             {/* Shipping address input */}

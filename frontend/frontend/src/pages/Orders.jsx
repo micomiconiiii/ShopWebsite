@@ -73,6 +73,8 @@ const OrdersList = () => {
             {/* Your orders list */}
             {orders.map((order) => {
                 const items = Array.isArray(JSON.parse(order.items)) ? JSON.parse(order.items) : [];
+                const totalCost = items.reduce((acc, item) => acc + item.totalCost, 0);
+                
                 return (
                     <div key={order.orderID} className="order-card">
                         {/* Order Details */}
@@ -81,6 +83,7 @@ const OrdersList = () => {
                             <p><strong>Status:</strong> {order.status}</p>
                             <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleString()}</p>
                             <p><strong>Shipping Address:</strong> {order.shippingAddress}</p>
+                            
                         </div>
     
                         {/* Item Details */}
@@ -101,7 +104,10 @@ const OrdersList = () => {
                                 )}
                             </div>
                         </div>
-    
+                        <div>
+                        <h3><strong>Total Cost:</strong> ${totalCost.toFixed(2)}</h3> {/* Display total cost */}
+                       
+                        </div>
                         {/* Cancel Order Button */}
                         <div className="order-actions">
                             <button onClick={() => handleDelete(order.orderID)} className="cancel-button">

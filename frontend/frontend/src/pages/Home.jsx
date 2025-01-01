@@ -116,6 +116,7 @@ const goToUserPage = () => {
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
+          <option value="select">Select</option>
           <option value="lprice">Lowest Price</option>
           <option value="hprice">Highest Price</option>
           <option value="stock">Available Stock</option>

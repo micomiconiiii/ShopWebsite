@@ -60,6 +60,7 @@
       shoe.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       shoe.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
 
     // Delete a shoe
     const handleDelete = async (id) => {

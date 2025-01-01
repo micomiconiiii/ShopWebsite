@@ -21,7 +21,7 @@ const Add =()=>{
         e.preventDefault()
         try{
             await axios.post("http://localhost:8800/shoes", shoe) // axios allows to communicate with API in react, makes http request
-            navigate("/")
+            navigate("/Shoes")
         }catch(err){
             console.log(err)    
         }

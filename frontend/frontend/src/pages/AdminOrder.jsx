@@ -39,16 +39,18 @@ const OrdersList = () => {
         setSelectedOrder(orderToUpdate);
         setIsUpdating(true);
     };
-
+    
     const handleSaveUpdate = async (updatedOrder) => {
         try {
+           
+            // Send the PUT request to update the order
             const response = await axios.put(`http://localhost:8800/orders/update-item/${updatedOrder.orderID}`, updatedOrder);
+            console.log("Response from server:", response);
+            console.log("Order ID:" + updatedOrder.orderID);
+            
+            
     
-            // If the order is marked as delivered, update stock
-            if (updatedOrder.status === 'Delivered') {
-                await handleStockUpdate(updatedOrder.items, updatedOrder.orderID);  // Call stock update function
-            }
-    
+            // Update the orders state with the updated order
             setOrders(orders.map(order => (order.orderID === updatedOrder.orderID ? updatedOrder : order)));
             setIsUpdating(false);
             setSelectedOrder(null);
@@ -57,38 +59,7 @@ const OrdersList = () => {
         }
     };
     
-    const handleStockUpdate = async (items, orderID) => {
-        try {
-            // Ensure that items is an array
-            if (typeof items === 'string') {
-                items = JSON.parse(items); // Parse the string to an array
-            }
-    
-            if (!Array.isArray(items)) {
-                console.error('Expected items to be an array but got:', typeof items);
-                return;
-            }
-    
-            // Loop through each item in the items array
-            for (let item of items) {
-                // Check if productID is defined before proceeding
-                if (item.productID !== undefined) {
-                    console.log("Updating stock for productID:", item.productID);
-    
-                    // Deduct the quantity from the stock if the status is delivered
-                    await axios.put(`http://localhost:8800/orders/update-stock/${item.productID}`, {
-                        quantity: -item.quantity  // Deduct quantity
-                    });
-                } else {
-                    console.warn("ProductID is missing for item:", item);
-                }
-            }
-        } catch (error) {
-            console.error('Error updating stock:', error);
-            alert('An error occurred while updating stock.');
-        }
-    };
-    
+ 
     
 
     if (loading) return <p>Loading orders...</p>;

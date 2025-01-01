@@ -39,8 +39,8 @@ const Update = () => {
       // Send a PUT request to update the product
       await axios.put(`http://localhost:8800/shoes/${shoeId}`, shoe);
       // After the update, navigate to the homepage or another page
-      navigate("/");
-    } catch (err) {
+      navigate("/Shoes");
+    } catch (err){
       console.log("Error updating shoe:", err);
     }
   };
@@ -48,7 +48,9 @@ const Update = () => {
   return (
     <div className="form">
       <h1>Update Item</h1>
-
+      
+      <div className='form-group'>
+      <label htmlFor="productName">Product Name</label>
       <input
         type="text"
         placeholder={shoe.prod_name || "Name"} // Show the current name as placeholder
@@ -56,6 +58,9 @@ const Update = () => {
         onChange={handleChange}
         name="prod_name"
       />
+      </div>
+      <div className='form-group'>
+      <label htmlFor="description">Description</label>
       <input
         type="text"
         placeholder={shoe.prod_description || "Description"} // Show the current description as placeholder
@@ -63,6 +68,9 @@ const Update = () => {
         onChange={handleChange}
         name="prod_description"
       />
+      </div>
+      <div className='form-group'>
+      <label htmlFor="price">Price</label>
       <input
         type="number"
         placeholder={shoe.price || "Price"} // Show the current price as placeholder
@@ -70,6 +78,9 @@ const Update = () => {
         onChange={handleChange}
         name="price"
       />
+      </div>
+      <div className='form-group'>
+      <label htmlFor="stock">Stock</label>
       <input
         type="number"
         placeholder={shoe.stock || "Stock"} // Show the current stock as placeholder
@@ -77,6 +88,9 @@ const Update = () => {
         onChange={handleChange}
         name="stock"
       />
+      </div>
+      <div className='form-group'>
+      <label htmlFor="image">Image</label>
       <input
         type="text"
         placeholder={shoe.image || "Image URL"} // Show the current image URL as placeholder
@@ -84,6 +98,7 @@ const Update = () => {
         onChange={handleChange}
         name="image"
       />
+      </div>
 
       <button onClick={handleClick}>Update</button>
     </div>
