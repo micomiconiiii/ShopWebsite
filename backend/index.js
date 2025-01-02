@@ -629,5 +629,32 @@ app.get('/showusers', (req, res) => {
     });
 
     
-})
+});
+
+app.post('/reviews', async (req, res) => {
+    const { productID, userID, rating, comment } = req.body;
+
+    if (!productID || !userID || !rating) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    try {
+        const sql = `
+            INSERT INTO reviews (productID, userID, rating, comment)
+            VALUES (?, ?, ?, ?)
+        `;
+        const values = [productID, userID, rating, comment || null];
+
+        db.query(sql, values, (err, result) => {
+            if (err) {
+                console.error('Error inserting review:', err);
+                return res.status(500).json({ message: 'Database error' });
+            }
+            res.status(201).json({ message: 'Review added successfully', reviewID: result.insertId });
+        });
+    } catch (error) {
+        console.error('Error in /reviews POST:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
