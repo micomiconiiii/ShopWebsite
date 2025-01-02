@@ -24,7 +24,6 @@ const Shoes = () => {
     fetchAllShoes();
   }, []);
 
-  // Fetch user data based on userID from localStorage
   
   // Sort shoes based on the selected option
   useEffect(() => {

@@ -621,3 +621,13 @@ app.put('/orders/update-item/:orderID', (req, res) => {
 
 
 
+app.get('/showusers', (req, res) => {
+    const q = "SELECT * FROM users";
+    db.query(q, (err,data)=>{
+        if(err) return res.json(err);
+        return res.json(data);
+    });
+
+    
+})
+

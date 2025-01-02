@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import User from "./pages/User";
 import Orders from "./pages/Orders";
 import AdminOrder from "./pages/AdminOrder";
+import AdminUser from "./pages/AdminUser";
 import "./style.css";
 
 function App() {
@@ -32,7 +33,8 @@ function App() {
           <Route path="/cart" element={<Cart/>}></Route>        
           <Route path="/user" element={<User/>}></Route>
           <Route path="/orders" element={<Orders/>}></Route>
-          <Route path="/orderdashboard" element={<AdminOrder/>}></Route>        
+          <Route path="/orderdashboard" element={<AdminOrder/>}></Route> 
+          <Route path="/showusers" element={<AdminUser/>}></Route>        
         
         </Routes>
       </BrowserRouter>

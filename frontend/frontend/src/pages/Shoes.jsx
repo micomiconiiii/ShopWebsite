@@ -160,6 +160,9 @@
         <button>
           <Link to="/orderdashboard">View Order Dashboard</Link>
         </button>
+        <button>
+          <Link to="/showusers">View Users</Link>
+        </button>
         
         {!userName ? (
         <button>
