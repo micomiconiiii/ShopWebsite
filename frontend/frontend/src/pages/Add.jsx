@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 const Add =()=>{
-    const [shoe, setShoe] = useState({
+    const [product, setShoe] = useState({
         prod_name:"",
         prod_description:"",
         price: null,
@@ -20,8 +20,8 @@ const Add =()=>{
     const handleAddProduct= async e=>{
         e.preventDefault()
         try{
-            await axios.post("http://localhost:8800/shoes", shoe) // axios allows to communicate with API in react, makes http request
-            navigate("/Shoes")
+            await axios.post("http://localhost:8800/products", product) // axios allows to communicate with API in react, makes http request
+            navigate("/products")
         }catch(err){
             console.log(err)    
         }

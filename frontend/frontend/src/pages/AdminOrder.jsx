@@ -153,7 +153,7 @@ const OrdersList = () => {
 
             <div>
                 <button type="button">
-                    <Link to="/Shoes">Back</Link>
+                    <Link to="/products">Back</Link>
                 </button>
             </div>
         </div>

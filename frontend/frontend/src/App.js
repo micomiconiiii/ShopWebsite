@@ -4,7 +4,7 @@ import {
   Route,
   
 } from "react-router-dom";
-import Shoes from "./pages/Shoes";
+import Products from "./pages/Products";
 import Add from "./pages/Add";
 import Update from "./pages/Update";
 import Login from "./pages/Login";
@@ -24,7 +24,7 @@ function App() {
         <Routes>
         <Route path="/" element={<Home />} />
         
-          <Route path="/shoes" element={<Shoes/>}></Route>
+          <Route path="/products" element={<Products/>}></Route>
           <Route path="/add" element={<Add/>}></Route>          
           <Route path="/update/:id" element={<Update/>}></Route>
           <Route path="/login" element={<Login/>}></Route>

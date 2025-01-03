@@ -78,7 +78,7 @@ const AdminUser = () => {
       </div>
       <div>
         <button>
-            <Link to="/shoes">Back</Link>
+            <Link to="/products">Back</Link>
         </button>
         <button onClick={handleLogout}>
             Log out

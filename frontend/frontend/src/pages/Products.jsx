@@ -2,45 +2,45 @@
   import axios from 'axios';
   import { Link, useNavigate } from "react-router-dom";
 
-  const Shoes = () => {
-    const [shoes, setShoes] = useState([]);
+  const Products = () => {
+    const [products, setProducts] = useState([]);
     const [sortOption, setSortOption] = useState('price'); // Default sorting by price
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
-    const [sortedShoes, setSortedShoes] = useState([]); // Store sorted shoes here
+    const [sortedproducts, setSortedproducts] = useState([]); // Store sorted products here
     const [userName] = useState(localStorage.getItem('name') || '');
     const navigate = useNavigate(); // For navigating to other pages
     const [rating, setAverageRatings] = useState([]);
-    // Fetch all shoes data
+    // Fetch all products data
     useEffect(() => {
-      const fetchAllShoes = async () => {
+      const fetchAllProducts = async () => {
         try {
-          const res = await axios.get("http://localhost:8800/shoes");
-          setShoes(res.data); // Set the shoes data after fetching
+          const res = await axios.get("http://localhost:8800/products");
+          setProducts(res.data); // Set the products data after fetching
         } catch (err) {
           console.log(err);
         }
       };
-      fetchAllShoes();
+      fetchAllProducts();
     }, []); // Empty dependency array to run once on component mount
     useEffect(() => {
       const fetchAverageRatings = async () => {
           const ratings = {};
   
           try {
-              const requests = shoes.map(shoe =>
-                  axios.get(`http://localhost:8800/reviews/average/${shoe.id}`)
+              const requests = products.map(product =>
+                  axios.get(`http://localhost:8800/reviews/average/${product.id}`)
               );
   
               const responses = await Promise.allSettled(requests);
   
               responses.forEach((response, index) => {
-                  const shoeId = shoes[index].id;
+                  const productId = products[index].id;
                   if (response.status === 'fulfilled') {
-                      ratings[shoeId] = response.value.data?.averageRating ?? 0;
+                      ratings[productId] = response.value.data?.averageRating ?? 0;
       
                     } else {
-                      console.log(`Error fetching average rating for shoe ID ${shoeId}:`, response.reason);
-                      ratings[shoeId] = 0;
+                      console.log(`Error fetching average rating for product ID ${productId}:`, response.reason);
+                      ratings[productId] = 0;
                   }
               });
   
@@ -50,29 +50,29 @@
           }
       };
   
-      if (shoes.length > 0) {
+      if (products.length > 0) {
           fetchAverageRatings();
       }
-  }, [shoes]);
+  }, [products]);
   
-    // Apply sorting logic when shoes or sortOption changes
+    // Apply sorting logic when products or sortOption changes
     useEffect(() => {
-      let filteredShoes = [...shoes]; // Create a shallow copy to avoid mutation
+      let filteredproducts = [...products]; // Create a shallow copy to avoid mutation
 
-      // Apply filtering for out-of-stock shoes based on selected sortOption
+      // Apply filtering for out-of-stock products based on selected sortOption
       if (sortOption === '0stock') {
-        filteredShoes = filteredShoes.filter(shoe => shoe.stock === 0); // Only out of stock shoes
+        filteredproducts = filteredproducts.filter(product => product.stock === 0); // Only out of stock products
       }
 
       // Apply sorting based on selected option
       if (sortOption === 'lprice') {
-        filteredShoes.sort((a, b) => a.price - b.price); // Sort by price (ascending)
+        filteredproducts.sort((a, b) => a.price - b.price); // Sort by price (ascending)
       } else if (sortOption === 'hprice') {
-        filteredShoes.sort((a, b) => b.price - a.price); // Sort by price (descending)
+        filteredproducts.sort((a, b) => b.price - a.price); // Sort by price (descending)
       } else if (sortOption === 'stock') {
-        filteredShoes.sort((a, b) => b.stock - a.stock); // Sort by stock (descending)
+        filteredproducts.sort((a, b) => b.stock - a.stock); // Sort by stock (descending)
       } else if (sortOption === 'price and stock') {
-        filteredShoes.sort((a, b) => {
+        filteredproducts.sort((a, b) => {
           if (a.stock === 0 && b.stock === 0) {
             return b.price - a.price; // If both are out of stock, sort by price (descending)
           } else if (a.stock === 0) {
@@ -84,27 +84,27 @@
         });
       }
 
-      setSortedShoes(filteredShoes); // Update sorted shoes
-    }, [shoes, sortOption]); // Only re-sort when shoes or sortOption changes
+      setSortedproducts(filteredproducts); // Update sorted products
+    }, [products, sortOption]); // Only re-sort when products or sortOption changes
 
-    // Filter shoes based on the search query
-    const filteredShoes = sortedShoes.filter(shoe => 
-      shoe.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      shoe.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
+    // Filter products based on the search query
+    const filteredproducts = sortedproducts.filter(product => 
+      product.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      product.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
     );
     
 
-    // Delete a shoe
+    // Delete a product
     const handleDelete = async (id) => {
       try {
         // Send DELETE request to remove the product
-        await axios.delete(`http://localhost:8800/shoes/${id}`);
+        await axios.delete(`http://localhost:8800/products/${id}`);
         
-        // Re-fetch the updated shoes data after deletion
-        const res = await axios.get("http://localhost:8800/shoes");
-        setShoes(res.data); // Update the state with the newly fetched shoe list
+        // Re-fetch the updated products data after deletion
+        const res = await axios.get("http://localhost:8800/products");
+        setProducts(res.data); // Update the state with the newly fetched product list
       } catch (err) {
-        console.error("Error deleting shoe:", err);
+        console.error("Error deleting product:", err);
       }
     };
     const handleLogout = () => {
@@ -146,49 +146,49 @@
         </div>
 
         {/* Warning for low stock */}
-        {shoes.some((shoe) => shoe.stock > 0 && shoe.stock <= 5) && (
+        {products.some((product) => product.stock > 0 && product.stock <= 5) && (
           <p style={{ color: 'red', fontWeight: 'bold' }}>
             Warning: Some products have low stocks!
           </p>
         )}
 
-        <div className='shoes'>
-          {filteredShoes.map((shoe) => (
+        <div className='products'>
+          {filteredproducts.map((product) => (
             <div
-              className='shoe'
-              key={shoe.id}
+              className='product'
+              key={product.id}
               style={{
-                backgroundColor: shoe.stock === 0 ? '#d3d3d3' : 'white',
-                opacity: shoe.stock === 0 ? 0.6 : 1,
+                backgroundColor: product.stock === 0 ? '#d3d3d3' : 'white',
+                opacity: product.stock === 0 ? 0.6 : 1,
               }}
             >
-              {shoe.image && <img src={shoe.image} alt="" style={{ opacity: shoe.stock === 0 ? 0.6 : 1 }} />}
+              {product.image && <img src={product.image} alt="" style={{ opacity: product.stock === 0 ? 0.6 : 1 }} />}
 
-              <h2>{shoe.prod_name}</h2>
-              <p>{shoe.prod_description}</p>
-              <span>Price: {shoe.price}</span>
-              <p>Rating: {rating[shoe.id] === 0 ? "No ratings yet" : rating[shoe.id]?.toFixed(2)}</p>
+              <h2>{product.prod_name}</h2>
+              <p>{product.prod_description}</p>
+              <span>Price: {product.price}</span>
+              <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
 
-              <span style={{ color: shoe.stock < 10 ? 'red' : 'black' }}>
-                Stock: {shoe.stock}
+              <span style={{ color: product.stock < 10 ? 'red' : 'black' }}>
+                Stock: {product.stock}
               </span>
 
-              {shoe.stock === 0 && (
+              {product.stock === 0 && (
                 <p style={{ color: 'gray', fontWeight: 'bold' }}>Out of Stock</p>
               )}
 
-              <button className='delete' onClick={() => handleDelete(shoe.id)}>
+              <button className='delete' onClick={() => handleDelete(product.id)}>
                 Delete
               </button>
               <button className='update'>
-                <Link to={`/update/${shoe.id}`}>Update</Link>
+                <Link to={`/update/${product.id}`}>Update</Link>
               </button>
             </div>
           ))}
         </div>
 
         <button>
-          <Link to="/add">Add new Shoes</Link>
+          <Link to="/add">Add new products</Link>
         </button>
         <button>
           <Link to="/orderdashboard">View Order Dashboard</Link>
@@ -211,4 +211,4 @@
     );
   };
 
-  export default Shoes;
+  export default Products;

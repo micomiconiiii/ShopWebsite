@@ -13,13 +13,13 @@ const Update = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const shoeId = location.pathname.split("/")[2]; // Get the shoe ID from URL
+  const productID = location.pathname.split("/")[2]; // Get the shoe ID from URL
 
   // Fetch the shoe data when the component loads
   useEffect(() => {
     const fetchShoeData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
+        const response = await axios.get(`http://localhost:8800/products/${productID}`);
         setShoe(response.data); // Set the fetched data into state
       } catch (error) {
         console.error("Error fetching shoe data:", error);
@@ -27,7 +27,7 @@ const Update = () => {
     };
 
     fetchShoeData();
-  }, [shoeId]);
+  }, [productID]);
 
   const handleChange = (e) => {
     setShoe((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -37,9 +37,9 @@ const Update = () => {
     e.preventDefault();
     try {
       // Send a PUT request to update the product
-      await axios.put(`http://localhost:8800/shoes/${shoeId}`, shoe);
+      await axios.put(`http://localhost:8800/products/${productID}`, shoe);
       // After the update, navigate to the homepage or another page
-      navigate("/Shoes");
+      navigate("/products");
     } catch (err){
       console.log("Error updating shoe:", err);
     }

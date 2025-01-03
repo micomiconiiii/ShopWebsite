@@ -32,7 +32,7 @@ const Login = () => {
             // Redirect based on role
             if (role === "admin") {
                 alert("Admin Login successful!");
-                navigate("/Shoes"); // Redirect to admin dashboard
+                navigate("/products"); // Redirect to admin dashboard
             } else {
                 
                 alert("Welcome back " + name+"!");

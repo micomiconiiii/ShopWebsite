@@ -53,9 +53,9 @@ const Cart = () => {
 
     
     // Update quantity of a cart item when the "+" or "-" button is clicked
-    const updateCartItem = async (shoeId, action) => {
-        const currentItem = cartItems.find(item => item.shoe_id === shoeId);
-        const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
+    const updateCartItem = async (productID, action) => {
+        const currentItem = cartItems.find(item => item.shoe_id === productID);
+        const response = await axios.get(`http://localhost:8800/products/${productID}`);
         const shoe = response.data;
         calculateSelectedTotal(selectedItems);
     
@@ -77,7 +77,7 @@ const Cart = () => {
             // Send the updated quantity and cost to the backend
             await axios.put('http://localhost:8800/cart/update', {
                 userId,
-                shoeId,
+                productID,
                 quantity: newQuantity,
                 cost: newCost
             });
@@ -85,7 +85,7 @@ const Cart = () => {
             // Update the local state with the new quantity
             setCartItems((prevItems) => {
                 const updatedItems = prevItems.map((item) =>
-                    item.shoe_id === shoeId ? { ...item, quantity: newQuantity } : item
+                    item.shoe_id === productID ? { ...item, quantity: newQuantity } : item
                 );
     
                 // Recalculate the total with updated cart items
@@ -104,13 +104,13 @@ const Cart = () => {
     
 
     // Remove item from cart
-    const removeItemFromCart = async (shoeId) => {
+    const removeItemFromCart = async (productID) => {
         try {
             await axios.delete('http://localhost:8800/cart/remove', {
-                data: { userId, shoeId },
+                data: { userId, productID },
             });
             setCartItems((prevItems) => {
-                const updatedItems = prevItems.filter((item) => item.shoe_id !== shoeId);
+                const updatedItems = prevItems.filter((item) => item.shoe_id !== productID);
                 calculateTotal(updatedItems); // Recalculate total after removal
                 return updatedItems; // Update the state with the updated cart
             });
@@ -125,7 +125,7 @@ const Cart = () => {
         const selectedItemsData = cartItems.filter(item => selectedItems.includes(item.shoe_id));
         
         for (let item of selectedItemsData) {
-            const response = await axios.get(`http://localhost:8800/shoes/${item.shoe_id}`);
+            const response = await axios.get(`http://localhost:8800/products/${item.shoe_id}`);
             const shoe = response.data;
             if (shoe.stock < item.quantity) {
                 alert(`Insufficient stock for ${item.prod_name}. Only ${shoe.stock} items are available.`);
@@ -180,12 +180,12 @@ const Cart = () => {
 
 
 // Handle checkbox change to toggle selection
-const handleCheckboxChange = (shoeId) => {
+const handleCheckboxChange = (productID) => {
     setSelectedItems((prevSelected) => {
-        if (prevSelected.includes(shoeId)) {
-            return prevSelected.filter((id) => id !== shoeId); // Deselect
+        if (prevSelected.includes(productID)) {
+            return prevSelected.filter((id) => id !== productID); // Deselect
         } else {
-            return [...prevSelected, shoeId]; // Select
+            return [...prevSelected, productID]; // Select
         }
     });
 };

@@ -2,47 +2,47 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
-const Shoes = () => {
+const Products = () => {
   const navigate = useNavigate(); // For navigating to other pages
-  const [shoes, setShoes] = useState([]);
+  const [products, setproducts] = useState([]);
   const [sortOption, setSortOption] = useState('price');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortedShoes, setSortedShoes] = useState([]);
+  const [sortedproducts, setSortedproducts] = useState([]);
   const [userName, setUserName] = useState(localStorage.getItem('name') || '');
   const userId = localStorage.getItem('userID'); // Retrieve userID from localStorage
   const [rating, setAverageRatings] = useState([]);
    
-  // Fetch all shoes data
+  // Fetch all products data
   useEffect(() => {
-    const fetchAllShoes = async () => {
+    const fetchAllProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:8800/shoes');
-        setShoes(res.data);
+        const res = await axios.get('http://localhost:8800/products');
+        setproducts(res.data);
       } catch (err) {
-        console.error('Error fetching shoes:', err);
+        console.error('Error fetching products:', err);
       }
     };
-    fetchAllShoes();
+    fetchAllProducts();
   }, []);
   useEffect(() => {
     const fetchAverageRatings = async () => {
         const ratings = {};
 
         try {
-            const requests = shoes.map(shoe =>
-                axios.get(`http://localhost:8800/reviews/average/${shoe.id}`)
+            const requests = products.map(product =>
+                axios.get(`http://localhost:8800/reviews/average/${product.id}`)
             );
 
             const responses = await Promise.allSettled(requests);
 
             responses.forEach((response, index) => {
-                const shoeId = shoes[index].id;
+                const productId = products[index].id;
                 if (response.status === 'fulfilled') {
-                    ratings[shoeId] = response.value.data?.averageRating ?? 0;
+                    ratings[productId] = response.value.data?.averageRating ?? 0;
     
                   } else {
-                    console.log(`Error fetching average rating for shoe ID ${shoeId}:`, response.reason);
-                    ratings[shoeId] = 0;
+                    console.log(`Error fetching average rating for product ID ${productId}:`, response.reason);
+                    ratings[productId] = 0;
                 }
             });
 
@@ -52,26 +52,26 @@ const Shoes = () => {
         }
     };
 
-    if (shoes.length > 0) {
+    if (products.length > 0) {
         fetchAverageRatings();
     }
-}, [shoes]);
+}, [products]);
 
   
-  // Sort shoes based on the selected option
+  // Sort products based on the selected option
   useEffect(() => {
-    let filteredShoes = [...shoes];
+    let filteredproducts = [...products];
 
     if (sortOption === '0stock') {
-      filteredShoes = filteredShoes.filter((shoe) => shoe.stock === 0);
+      filteredproducts = filteredproducts.filter((product) => product.stock === 0);
     } else if (sortOption === 'lprice') {
-      filteredShoes.sort((a, b) => a.price - b.price);
+      filteredproducts.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'hprice') {
-      filteredShoes.sort((a, b) => b.price - a.price);
+      filteredproducts.sort((a, b) => b.price - a.price);
     } else if (sortOption === 'stock') {
-      filteredShoes.sort((a, b) => b.stock - a.stock);
+      filteredproducts.sort((a, b) => b.stock - a.stock);
     } else if (sortOption === 'price and stock') {
-      filteredShoes.sort((a, b) => {
+      filteredproducts.sort((a, b) => {
         if (a.stock === 0 && b.stock === 0) return b.price - a.price;
         if (a.stock === 0) return 1;
         if (b.stock === 0) return -1;
@@ -79,36 +79,36 @@ const Shoes = () => {
       });
     }
 
-    setSortedShoes(filteredShoes);
-  }, [shoes, sortOption]);
+    setSortedproducts(filteredproducts);
+  }, [products, sortOption]);
 
-  // Filter shoes based on search query
-  const filteredShoes = sortedShoes.filter((shoe) =>
-    shoe.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    shoe.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter products based on search query
+  const filteredproducts = sortedproducts.filter((product) =>
+    product.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Add item to cart
-  const addItemToCart = async (shoeId) => {
+  const addItemToCart = async (productId) => {
     try {
       if (!userId) {
         alert('User not logged in');
         console.log('User must log in first');
         
         return;
-      }      // Fetch the shoe details (including the price) based on shoeId
-      const response = await axios.get(`http://localhost:8800/shoes/${shoeId}`);
-      const shoe = response.data;
+      }      // Fetch the product details (including the price) based on productId
+      const response = await axios.get(`http://localhost:8800/products/${productId}`);
+      const product = response.data;
 
-      if (!shoe || !shoe.price) {
-          console.error('Shoe data is invalid or missing price');
+      if (!product || !product.price) {
+          console.error('product data is invalid or missing price');
           return;
       }
       await axios.post('http://localhost:8800/cart/add', {
         userId,
-        shoeId,
+        productId,
         quantity: 1, // Default quantity to 1
-        cost: shoe.price
+        cost: product.price
       });
       alert('Item added to cart!');
     } catch (error) {
@@ -168,32 +168,32 @@ const goToUserPage = () => {
         />
       </div>
 
-      {shoes.some((shoe) => shoe.stock > 0 && shoe.stock <= 5) && (
+      {products.some((product) => product.stock > 0 && product.stock <= 5) && (
         <p style={{ color: 'red', fontWeight: 'bold' }}>
           Warning: Some products have low stocks!
         </p>
       )}
 
-      <div className="shoes">
-        {filteredShoes.map((shoe) => (
+      <div className="products">
+        {filteredproducts.map((product) => (
           <div
-            className="shoe"
-            key={shoe.id}
+            className="product"
+            key={product.id}
             style={{
-              backgroundColor: shoe.stock === 0 ? '#d3d3d3' : 'white',
-              opacity: shoe.stock === 0 ? 0.6 : 1,
+              backgroundColor: product.stock === 0 ? '#d3d3d3' : 'white',
+              opacity: product.stock === 0 ? 0.6 : 1,
             }}
           >
-            {shoe.image && <img src={shoe.image} alt={shoe.prod_name} />}
-            <h2>{shoe.prod_name}</h2>
-            <p>{shoe.prod_description}</p>
-            <span>Price: ${shoe.price}</span>
-            <span style={{ color: shoe.stock < 10 ? 'red' : 'black' }}>
-              Stock: {shoe.stock}
+            {product.image && <img src={product.image} alt={product.prod_name} />}
+            <h2>{product.prod_name}</h2>
+            <p>{product.prod_description}</p>
+            <span>Price: ${product.price}</span>
+            <span style={{ color: product.stock < 10 ? 'red' : 'black' }}>
+              Stock: {product.stock}
             </span>
-            <p>Rating: {rating[shoe.id] === 0 ? "No ratings yet" : rating[shoe.id]?.toFixed(2)}</p>
-            <div>
-              <button onClick={() => addItemToCart(shoe.id)}>Add to Cart</button>
+            <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
+          <div>
+              <button onClick={() => addItemToCart(product.id)}>Add to Cart</button>
             </div>
           </div>
         ))}
@@ -218,4 +218,4 @@ const goToUserPage = () => {
   );
 };
 
-export default Shoes;
+export default Products;

@@ -172,8 +172,8 @@ app.post("/logout", (req, res) => {
 
 
 // product routes
-app.get("/shoes", (req, res) => {
-    const q = "SELECT * FROM shoes";
+app.get("/products", (req, res) => {
+    const q = "SELECT * FROM products";
     db.query(q, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -283,8 +283,8 @@ app.get("/user/:userId", isAuthenticated, (req, res) => {
 
 
 
-app.post("/shoes", (req, res) => {
-    const q = "INSERT INTO shoes (`prod_name`, `prod_description`, `image`, `price`, `stock`) VALUES (?)";
+app.post("/products", (req, res) => {
+    const q = "INSERT INTO products (`prod_name`, `prod_description`, `image`, `price`, `stock`) VALUES (?)";
     const values = [
         req.body.prod_name,
         req.body.prod_description,
@@ -305,9 +305,9 @@ app.listen(8800, () => {
     console.log("Backend connected on port 8800");
 });
 // deletes the product based on the ID
-app.delete("/shoes/:id", (req,res)=>{
+app.delete("/products/:id", (req,res)=>{
     const shoeId = req.params.id;
-    const q = "DELETE FROM shoes WHERE id = ?" // executes sql statements for deleting items
+    const q = "DELETE FROM products WHERE id = ?" // executes sql statements for deleting items
     db.query(q, [shoeId], (err, data)=>{
         if (err) return res.json(err)
         return res.json("Successfully executed")
@@ -315,7 +315,7 @@ app.delete("/shoes/:id", (req,res)=>{
 })
 
 // updates the product based on the ID without requiring all fields to be populated
-app.put("/shoes/:id", async (req, res) => {
+app.put("/products/:id", async (req, res) => {
     const shoeId = req.params.id;
     const { prod_name, prod_description, image, price, stock } = req.body;
 
@@ -362,33 +362,33 @@ app.put("/shoes/:id", async (req, res) => {
         return res.status(400).json({ error: "No valid fields to update" });
     }
 
-    // Add the shoe ID to the values array
+    // Add the product ID to the values array
     values.push(shoeId);
 
     // Construct the SQL query
-    const query = `UPDATE shoes SET ${updates.join(", ")} WHERE id = ?`;
+    const query = `UPDATE products SET ${updates.join(", ")} WHERE id = ?`;
 
     // Execute the update query
     db.query(query, values, (err, data) => {
         if (err) {
             console.error(err);
-            return res.status(500).json({ error: "Error updating the shoe" });
+            return res.status(500).json({ error: "Error updating the product" });
         }
 
-        return res.json({ message: "Shoe updated successfully" });
+        return res.json({ message: "product updated successfully" });
     });
 });
 
-// Route to get a single shoe by id
-app.get("/shoes/:id", (req, res) => {
+// Route to get a single product by id
+app.get("/products/:id", (req, res) => {
     const shoeId = req.params.id;
-    const query = "SELECT * FROM shoes WHERE id = ?";
+    const query = "SELECT * FROM products WHERE id = ?";
     
     db.query(query, [shoeId], (err, data) => {
-        if (err) return res.status(500).json({ error: "Error fetching shoe data" });
-        if (data.length === 0) return res.status(404).json({ error: "Shoe not found" });
+        if (err) return res.status(500).json({ error: "Error fetching product data" });
+        if (data.length === 0) return res.status(404).json({ error: "product not found" });
         
-        return res.json(data[0]); // Return the first (and only) matching shoe
+        return res.json(data[0]); // Return the first (and only) matching product
     });
 });
 
@@ -398,13 +398,13 @@ app.get("/shoes/:id", (req, res) => {
 app.post('/cart/add', (req, res) => {
     const { userId, shoeId, quantity, cost } = req.body;
 
-    // Check if the user already has this shoe in their cart
+    // Check if the user already has this product in their cart
     const checkSql = `SELECT * FROM cart_items WHERE user_id = ? AND shoe_id = ?`;
     db.query(checkSql, [userId, shoeId], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         if (result.length > 0) {
-            // If the shoe is already in the cart, update the quantity
+            // If the product is already in the cart, update the quantity
             const newQuantity = result[0].quantity + quantity;
             const newCost = result[0].cost * newQuantity;
             const updateSql = `UPDATE cart_items SET quantity = ?, cost = ? WHERE user_id = ? AND shoe_id = ?`;
@@ -417,7 +417,7 @@ app.post('/cart/add', (req, res) => {
             });
 
         } else {
-            // If the shoe is not in the cart, insert it as a new item
+            // If the product is not in the cart, insert it as a new item
             const insertSql = `INSERT INTO cart_items (user_id, shoe_id, quantity, cost) VALUES (?, ?, ?, ?)`;
             db.query(insertSql, [userId, shoeId, quantity, cost], (err, insertResult) => {
                 if (err) return res.status(500).json({ error: err.message });
@@ -431,7 +431,7 @@ app.post('/cart/add', (req, res) => {
   // Get cart items for a user
   app.get('/cart/:userId', (req, res) => {
     const userId = req.params.userId;
-    const sql = `SELECT * FROM cart_items JOIN shoes ON cart_items.shoe_id = shoes.id WHERE user_id = ?`;
+    const sql = `SELECT * FROM cart_items JOIN products ON cart_items.shoe_id = products.id WHERE user_id = ?`;
     db.query(sql, [userId], (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
       res.status(200).json(results);
@@ -586,7 +586,7 @@ app.put('/orders/update-item/:orderID', (req, res) => {
                         console.log(`Updating stock for productID: ${item.productID} with quantity: ${item.quantity}`);
                         return new Promise((resolve, reject) => {
                             db.query(
-                                'UPDATE shoes SET stock = stock - ? WHERE id = ?',
+                                'UPDATE products SET stock = stock - ? WHERE id = ?',
                                 [item.quantity, item.productID],
                                 (err) => {
                                     if (err) {
