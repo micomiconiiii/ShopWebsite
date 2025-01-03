@@ -656,5 +656,38 @@ app.post('/reviews', async (req, res) => {
         console.error('Error in /reviews POST:', error);
         res.status(500).json({ message: 'Server error' });
     }
-});
+    });
+    const getAverageRating = async (productID) => {
+        return new Promise((resolve, reject) => {
+        const query = `
+            SELECT AVG(rating) AS averageRating
+            FROM reviews
+            WHERE productID = ?
+        `;
+    
+        db.query(query, [productID], (err, results) => {
+            if (err) {
+            return reject(err);
+            }
+            // If there are no ratings for the product, return 0
+            const averageRating = results[0].averageRating || 0;
+            resolve(averageRating);
+        });
+        });
+    };
+    
+    // Route to fetch average ratings for a product
+    app.get('/reviews/average/:productID', async (req, res) => {
+        const productID = parseInt(req.params.productID, 10);
+    
+        try {
+        const averageRating = await getAverageRating(productID);
+        console.log("average rating: " +averageRating);
+        return res.json({ averageRating });
+        } catch (err) {
+        console.error('Error fetching average rating:', err);
+        return res.status(500).json({ message: 'Server error' });
+        }
+    });
+
 

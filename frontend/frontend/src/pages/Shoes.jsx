@@ -9,7 +9,7 @@
     const [sortedShoes, setSortedShoes] = useState([]); // Store sorted shoes here
     const [userName] = useState(localStorage.getItem('name') || '');
     const navigate = useNavigate(); // For navigating to other pages
-      
+    const [rating, setAverageRatings] = useState([]);
     // Fetch all shoes data
     useEffect(() => {
       const fetchAllShoes = async () => {
@@ -22,7 +22,39 @@
       };
       fetchAllShoes();
     }, []); // Empty dependency array to run once on component mount
-
+    useEffect(() => {
+      const fetchAverageRatings = async () => {
+          const ratings = {};
+  
+          try {
+              const requests = shoes.map(shoe =>
+                  axios.get(`http://localhost:8800/reviews/average/${shoe.id}`)
+              );
+  
+              const responses = await Promise.allSettled(requests);
+  
+              responses.forEach((response, index) => {
+                  const shoeId = shoes[index].id;
+                  if (response.status === 'fulfilled') {
+                      ratings[shoeId] = response.value.data?.averageRating ?? 0;
+      
+                    } else {
+                      console.log(`Error fetching average rating for shoe ID ${shoeId}:`, response.reason);
+                      ratings[shoeId] = 0;
+                  }
+              });
+  
+              setAverageRatings(ratings);
+          } catch (err) {
+              console.error('Error fetching average ratings:', err);
+          }
+      };
+  
+      if (shoes.length > 0) {
+          fetchAverageRatings();
+      }
+  }, [shoes]);
+  
     // Apply sorting logic when shoes or sortOption changes
     useEffect(() => {
       let filteredShoes = [...shoes]; // Create a shallow copy to avoid mutation
@@ -135,6 +167,7 @@
               <h2>{shoe.prod_name}</h2>
               <p>{shoe.prod_description}</p>
               <span>Price: {shoe.price}</span>
+              <p>Rating: {rating[shoe.id] === 0 ? "No ratings yet" : rating[shoe.id]?.toFixed(2)}</p>
 
               <span style={{ color: shoe.stock < 10 ? 'red' : 'black' }}>
                 Stock: {shoe.stock}

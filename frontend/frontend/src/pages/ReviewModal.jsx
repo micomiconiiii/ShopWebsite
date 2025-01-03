@@ -32,12 +32,13 @@ const ReviewModal = ({ show, onClose, productID, productName, userID, onReviewSu
             console.log('Review submitted:', response.data);
             setSuccess(true);
             setError(null);
-            onReviewSubmit(); // Callback to refresh parent component if needed
+            setComment(reviewData.comment); // Store the submitted comment
+            setRating(reviewData.rating); // Store the submitted rating
             alert("Review submitted successfully.");
         } catch (err) {
             console.error('Error submitting review:', err);
             setError(err.response?.data?.message || 'Error submitting review');
-            setSuccess(false); 
+            setSuccess(false);
         }
     };
 
@@ -50,7 +51,13 @@ const ReviewModal = ({ show, onClose, productID, productName, userID, onReviewSu
                 <h2>Leave a Review for {productName}</h2>
                 {error && <p className="error">{error}</p>}
                 {success ? (
-                    <p className="success">Review submitted successfully!</p>
+                    <div className="review-summary">
+                        <p className="success">Review submitted successfully!</p>
+                        <h3>Your Review</h3>
+                        <p><strong>Rating:</strong> {rating} / 5</p>
+                        <p><strong>Comment:</strong> {comment}</p>
+                        <button onClick={onClose}>Close</button>
+                    </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
                         <div>
