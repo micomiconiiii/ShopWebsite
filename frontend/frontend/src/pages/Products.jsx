@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
 import '../products.css';
-import AddUser from './Register';
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [sortOption, setSortOption] = useState('price');
@@ -11,6 +11,24 @@ const Products = () => {
   const [userName] = useState(localStorage.getItem('name') || '');
   const navigate = useNavigate();
   const [rating, setAverageRatings] = useState([]);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [tagsInput, setTagsInput] = useState([]);
+  const [existingTags, setExistingTags] = useState([]);
+  const [newTag, setNewTag] = useState('');  // New state to store the new tag input
+
+  useEffect(() => {
+    const fetchExistingTags = async () => {
+      try {
+        const response = await axios.get('http://localhost:8800/tags');  // API to fetch tags
+        setExistingTags(response.data);  // Store fetched tags in state
+      } catch (err) {
+        console.error('Error fetching existing tags:', err);
+      }
+    };
+
+    fetchExistingTags();
+  }, []);
 
   useEffect(() => {
     const fetchAllProducts = async () => {
@@ -87,6 +105,67 @@ const Products = () => {
     product.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleTagSelection = (e) => {
+    const selectedTags = Array.from(e.target.selectedOptions, (option) => option.value);
+    setTagsInput(selectedTags);  // Store the selected tags into state
+  };
+  
+  const handleAddTags = async () => {
+    if (!currentProduct || tagsInput.length === 0) return;
+  
+    try {
+      // Use the tag IDs directly from tagsInput
+      for (let tagId of tagsInput) {
+        // Associate the product with the tag in the 'product_tags' table using the tagId
+        await axios.post(
+          `http://localhost:8800/product_tags`,
+          { product_id: currentProduct.id, tag_id: tagId },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+  
+      // After adding, update product tags in state
+      setProducts(products.map((product) =>
+        product.id === currentProduct.id
+          ? { ...product, tags: [...product.tags, ...tagsInput] }
+          : product
+      ));
+  
+      // Close the modal and reset the inputs
+      setShowTagModal(false);
+      setTagsInput([]);  // Clear the tags input
+      setNewTag('');  // Clear the new tag input
+    } catch (err) {
+      console.error('Error adding tags:', err);
+    }
+  };
+  
+ 
+
+  const handleNewTagChange = (e) => {
+    setNewTag(e.target.value);  // Update new tag input state
+  };
+
+  const addNewTag = () => {
+    if (newTag && !tagsInput.includes(newTag)) {
+      setTagsInput([...tagsInput, newTag]);  // Add new tag to the list
+      alert("Tag Added");
+    }
+  };
+
+  const openTagModal = (product) => {
+    setCurrentProduct(product);
+    setTagsInput(product.tags || []);  // Pre-fill with existing tags
+    setShowTagModal(true);
+  };
+
+  const closeTagModal = () => {
+    setShowTagModal(false);
+    setCurrentProduct(null);
+    setTagsInput([]);
+    setNewTag('');  // Clear new tag input
+  };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:8800/products/${id}`);
@@ -105,6 +184,7 @@ const Products = () => {
   const addUser = () => {
     navigate('/register');
   };
+
   return (
     <div className="products-container">
       <header>
@@ -141,12 +221,6 @@ const Products = () => {
         </div>
       </div>
 
-      {products.some((product) => product.stock > 0 && product.stock <= 5) && (
-        <p className="low-stock-warning">
-          Warning: Some products have low stocks!
-        </p>
-      )}
-
       <div className="products-grid">
         {filteredProducts.map((product) => (
           <div className="product-card" key={product.id}>
@@ -161,17 +235,52 @@ const Products = () => {
               {product.stock === 0 && (
                 <p className="out-of-stock">Out of Stock</p>
               )}
+              <p className="tags">
+                Tags: {product.tags ? product.tags.join(', ') : 'No tags yet'}
+              </p>
             </div>
             <div className="product-actions">
               <button className="delete-btn" onClick={() => handleDelete(product.id)}>Delete</button>
               <button className="update-btn">
                 <Link to={`/update/${product.id}`}>Update</Link>
               </button>
+              <button onClick={() => openTagModal(product)}>Manage Tags</button>
             </div>
           </div>
         ))}
       </div>
 
+      {showTagModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Manage Tags for {currentProduct?.prod_name}</h3>
+            <div>
+              <input
+                type="text"
+                value={newTag}
+                onChange={handleNewTagChange}
+                placeholder="Add a new tag"
+              />
+              <button onClick={addNewTag}>Add New Tag</button>
+            </div>
+            <select
+              multiple
+              value={tagsInput}
+              onChange={(e) => handleTagSelection(Array.from(e.target.selectedOptions, option => option.value))}
+            >
+              {existingTags.map(tag => (
+                <option key={tag.id} value={tag.name}>{tag.name}</option>
+              ))}
+            </select>
+            <div className="modal-actions">
+              <button onClick={handleAddTags}>Save Tags</button>
+              <button onClick={closeTagModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New User and Logout */}
       <div className="admin-actions">
         <button className="add-btn">
           <Link to="/add">Add new products</Link>
@@ -185,8 +294,6 @@ const Products = () => {
         <button className="add-btn" onClick={addUser}>
           Add New User
         </button>
-        
-
         {!userName ? (
           <button className="login-btn">
             <Link to="/login">Log in</Link>

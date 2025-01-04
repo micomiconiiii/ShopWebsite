@@ -696,3 +696,32 @@ app.post('/reviews', async (req, res) => {
     });
 
 
+// tags
+// Create Tag (if not exists) and Associate with Product
+app.post('/tags', (req, res) => {
+    const { name } = req.body;
+    const query = 'INSERT INTO tags (name) VALUES (?)';
+    db.query(query, [name], (err, result) => {
+      if (err) return res.status(500).json({ error: 'Failed to create tag' });
+      res.status(200).json({ message: 'Tag created successfully' });
+    });
+  });
+  
+  // Add Tag to Product
+  app.post('/product_tags', (req, res) => {
+    const { product_id, tag_id } = req.body;
+    console.log("product id, tag id: ", product_id, tag_id );
+    const query = 'INSERT INTO product_tags (product_id, tag_id) VALUES (?, ?)';
+    db.query(query, [product_id, tag_id], (err, result) => {
+      if (err) return res.status(500).json({ error: 'Failed to associate tag with product' });
+      res.status(200).json({ message: 'Tag added to product' });
+    });
+  });
+  
+  // Get Tags (for selection)
+  app.get('/tags', (req, res) => {
+    db.query('SELECT * FROM tags', (err, result) => {
+      if (err) return res.status(500).json({ error: 'Failed to fetch tags' });
+      res.json(result);
+    });
+  });
