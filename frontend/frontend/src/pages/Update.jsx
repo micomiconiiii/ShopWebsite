@@ -99,6 +99,17 @@ const Update = () => {
         name="image"
       />
       </div>
+      <div className='form-group'>
+      <label htmlFor="category">Category</label>
+      
+      <select  placeholder={shoe.category || "No Category"} value={shoe.category || ""} onChange={handleChange} name="category">
+                <option value=""> Select Category</option>
+                <option value="Men"> Men</option>
+                <option value="Women"> Women</option>
+                <option value="Kids"> Kids</option>
+            </select>
+            
+      </div>
 
       <button onClick={handleClick}>Update</button>
     </div>

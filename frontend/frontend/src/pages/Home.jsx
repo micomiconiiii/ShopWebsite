@@ -3,75 +3,77 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Products = () => {
-  const navigate = useNavigate(); // For navigating to other pages
-  const [products, setproducts] = useState([]);
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
   const [sortOption, setSortOption] = useState('price');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortedproducts, setSortedproducts] = useState([]);
+  const [sortedProducts, setSortedProducts] = useState([]);
   const [userName, setUserName] = useState(localStorage.getItem('name') || '');
-  const userId = localStorage.getItem('userID'); // Retrieve userID from localStorage
+  const userId = localStorage.getItem('userID');
   const [rating, setAverageRatings] = useState([]);
-   
+  const [categories, setCategories] = useState([]); // Store category list
+  const [selectedCategory, setSelectedCategory] = useState(''); // Store selected category
+
   // Fetch all products data
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
         const res = await axios.get('http://localhost:8800/products');
-        setproducts(res.data);
+        setProducts(res.data);
+        // Extract unique categories from products
+        const uniqueCategories = [...new Set(res.data.map(product => product.category))];
+        setCategories(uniqueCategories);
       } catch (err) {
         console.error('Error fetching products:', err);
       }
     };
     fetchAllProducts();
   }, []);
+
+  // Fetch average ratings
   useEffect(() => {
     const fetchAverageRatings = async () => {
-        const ratings = {};
+      const ratings = {};
+      try {
+        const requests = products.map(product =>
+          axios.get(`http://localhost:8800/reviews/average/${product.id}`)
+        );
 
-        try {
-            const requests = products.map(product =>
-                axios.get(`http://localhost:8800/reviews/average/${product.id}`)
-            );
-
-            const responses = await Promise.allSettled(requests);
-
-            responses.forEach((response, index) => {
-                const productId = products[index].id;
-                if (response.status === 'fulfilled') {
-                    ratings[productId] = response.value.data?.averageRating ?? 0;
-    
-                  } else {
-                    console.log(`Error fetching average rating for product ID ${productId}:`, response.reason);
-                    ratings[productId] = 0;
-                }
-            });
-
-            setAverageRatings(ratings);
-        } catch (err) {
-            console.error('Error fetching average ratings:', err);
-        }
+        const responses = await Promise.allSettled(requests);
+        responses.forEach((response, index) => {
+          const productId = products[index].id;
+          if (response.status === 'fulfilled') {
+            ratings[productId] = response.value.data?.averageRating ?? 0;
+          } else {
+            console.log(`Error fetching average rating for product ID ${productId}:`, response.reason);
+            ratings[productId] = 0;
+          }
+        });
+        setAverageRatings(ratings);
+      } catch (err) {
+        console.error('Error fetching average ratings:', err);
+      }
     };
 
     if (products.length > 0) {
-        fetchAverageRatings();
+      fetchAverageRatings();
     }
-}, [products]);
+  }, [products]);
 
-  
   // Sort products based on the selected option
   useEffect(() => {
-    let filteredproducts = [...products];
+    let filteredProducts = [...products];
 
     if (sortOption === '0stock') {
-      filteredproducts = filteredproducts.filter((product) => product.stock === 0);
+      filteredProducts = filteredProducts.filter((product) => product.stock === 0);
     } else if (sortOption === 'lprice') {
-      filteredproducts.sort((a, b) => a.price - b.price);
+      filteredProducts.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'hprice') {
-      filteredproducts.sort((a, b) => b.price - a.price);
+      filteredProducts.sort((a, b) => b.price - a.price);
     } else if (sortOption === 'stock') {
-      filteredproducts.sort((a, b) => b.stock - a.stock);
+      filteredProducts.sort((a, b) => b.stock - a.stock);
     } else if (sortOption === 'price and stock') {
-      filteredproducts.sort((a, b) => {
+      filteredProducts.sort((a, b) => {
         if (a.stock === 0 && b.stock === 0) return b.price - a.price;
         if (a.stock === 0) return 1;
         if (b.stock === 0) return -1;
@@ -79,11 +81,16 @@ const Products = () => {
       });
     }
 
-    setSortedproducts(filteredproducts);
-  }, [products, sortOption]);
+    // Apply category filter if selected
+    if (selectedCategory) {
+      filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
+    }
+
+    setSortedProducts(filteredProducts);
+  }, [products, sortOption, selectedCategory]); // Added selectedCategory to dependencies
 
   // Filter products based on search query
-  const filteredproducts = sortedproducts.filter((product) =>
+  const filteredProducts = sortedProducts.filter((product) =>
     product.prod_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -94,20 +101,20 @@ const Products = () => {
       if (!userId) {
         alert('User not logged in');
         console.log('User must log in first');
-        
         return;
-      }      // Fetch the product details (including the price) based on productId
+      }
       const response = await axios.get(`http://localhost:8800/products/${productId}`);
       const product = response.data;
 
       if (!product || !product.price) {
-          console.error('product data is invalid or missing price');
-          return;
+        console.error('Product data is invalid or missing price');
+        return;
       }
+
       await axios.post('http://localhost:8800/cart/add', {
         userId,
         productId,
-        quantity: 1, // Default quantity to 1
+        quantity: 1,
         cost: product.price
       });
       alert('Item added to cart!');
@@ -119,22 +126,20 @@ const Products = () => {
   // Handle logout
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login'); // Redirect to login page
+    navigate('/login');
   };
 
   // Go to the user page
+  const goToUserPage = () => {
+    const userID = localStorage.getItem('userID');
+    const token = localStorage.getItem('token');
 
-const goToUserPage = () => {
-  const userID = localStorage.getItem('userID'); // Retrieve userID from localStorage
-  const token = localStorage.getItem('token'); // Retrieve token from localStorage
-
-  // Check if userID and token exist in localStorage
-  if (userID && token) {
-    navigate('/user'); // Navigate to user page 
-  } else {
-    navigate('/login'); // If not authenticated, go to login page
-  }
-};
+    if (userID && token) {
+      navigate('/user');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div>
@@ -168,6 +173,21 @@ const goToUserPage = () => {
         />
       </div>
 
+      {/* Category filter button */}
+      <div>
+        <label htmlFor="categoryFilter">Filter by Category:</label>
+        <select
+          id="categoryFilter"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {categories.map((category, index) => (
+            <option key={index} value={category}>{category}</option>
+          ))}
+        </select>
+      </div>
+
       {products.some((product) => product.stock > 0 && product.stock <= 5) && (
         <p style={{ color: 'red', fontWeight: 'bold' }}>
           Warning: Some products have low stocks!
@@ -175,7 +195,7 @@ const goToUserPage = () => {
       )}
 
       <div className="products">
-        {filteredproducts.map((product) => (
+        {filteredProducts.map((product) => (
           <div
             className="product"
             key={product.id}
@@ -192,7 +212,7 @@ const goToUserPage = () => {
               Stock: {product.stock}
             </span>
             <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
-          <div>
+            <div>
               <button onClick={() => addItemToCart(product.id)}>Add to Cart</button>
             </div>
           </div>
@@ -203,18 +223,15 @@ const goToUserPage = () => {
         <Link to="/cart">Show Cart</Link>
       </button>
       {!userName ? (
-              <button>
-              <Link to="/login">Log in</Link>
-              </button>
-              ) : (
-              
-              <button onClick={handleLogout}>
-              Log out
-              </button>
-        )}
+        <button>
+          <Link to="/login">Log in</Link>
+        </button>
+      ) : (
+        <button onClick={handleLogout}>Log out</button>
+      )}
       <button onClick={goToUserPage}>Go to User Page</button>
-      <button type="button"><Link to ="/orders">View Order Status</Link></button>
-      </div>
+      <button type="button"><Link to="/orders">View Order Status</Link></button>
+    </div>
   );
 };
 

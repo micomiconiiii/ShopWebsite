@@ -1,0 +1,131 @@
+/* Global Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  
+  h1 {
+    color: #333;
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  header {
+    padding: 20px;
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .filters {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+  }
+  
+  .sort-options, .search-input {
+    flex: 1;
+  }
+  
+  input, select {
+    padding: 8px;
+    width: 100%;
+    margin-top: 5px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    margin: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .product-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .product-details {
+    padding: 15px;
+  }
+  
+  .product-details h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  
+  .price {
+    color: #4CAF50;
+    font-weight: bold;
+  }
+  
+  .low-stock-warning {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .product-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+  }
+  
+  .product-actions .delete-btn,
+  .product-actions .update-btn {
+    padding: 10px 15px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .product-actions .delete-btn:hover,
+  .product-actions .update-btn:hover {
+    background-color: #e53935;
+  }
+  
+  .admin-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .admin-actions button {
+    margin: 10px;
+  }
+  
+  .stock-status.low {
+    color: red;
+  }
+  
+  .out-of-stock {
+    color: gray;
+    font-weight: bold;
+  }
+  

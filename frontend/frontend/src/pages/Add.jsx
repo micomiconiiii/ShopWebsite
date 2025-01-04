@@ -36,7 +36,15 @@ const Add =()=>{
             <input type="number" placeholder='Price' onChange={handleChange} name="price"/>
             <input type="number" placeholder='Stock' onChange={handleChange} name="stock"/>
             <input type="text" placeholder='Image' onChange={handleChange} name="image" />
+            <div>
+            <select  placeholder='Select Category' onChange={handleChange} name="category">
+                <option value=""> Select Category</option>
+                <option value="Men"> Men</option>
+                <option value="Women"> Women</option>
+                <option value="Women"> Kids</option>
+            </select>
             
+            </div>
             <button onClick={handleAddProduct}>Add</button>
             
         </div>

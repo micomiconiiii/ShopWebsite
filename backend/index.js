@@ -284,13 +284,14 @@ app.get("/user/:userId", isAuthenticated, (req, res) => {
 
 
 app.post("/products", (req, res) => {
-    const q = "INSERT INTO products (`prod_name`, `prod_description`, `image`, `price`, `stock`) VALUES (?)";
+    const q = "INSERT INTO products (`prod_name`, `prod_description`, `image`, `price`, `stock`, `category`) VALUES (?)";
     const values = [
         req.body.prod_name,
         req.body.prod_description,
         req.body.image,
         req.body.price,
-        req.body.stock
+        req.body.stock,
+        req.body.category
     ];
 
     db.query(q, [values], (err, data) => {
@@ -317,7 +318,7 @@ app.delete("/products/:id", (req,res)=>{
 // updates the product based on the ID without requiring all fields to be populated
 app.put("/products/:id", async (req, res) => {
     const shoeId = req.params.id;
-    const { prod_name, prod_description, image, price, stock } = req.body;
+    const { prod_name, prod_description, image, price, stock, category } = req.body;
 
     // Validate input data
     if (price && isNaN(price)) {
@@ -355,6 +356,10 @@ app.put("/products/:id", async (req, res) => {
     if (stock !== undefined) {
         updates.push("stock = ?");
         values.push(stock);
+    }
+    if (category) {
+        updates.push("category = ?");
+        values.push(category);
     }
 
     // If no values to update, return an error
