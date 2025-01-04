@@ -41,7 +41,31 @@ const Products = () => {
     };
     fetchAllProducts();
   }, []);
-
+  useEffect(() => {
+    const fetchTagsForProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:8800/product_tags");
+        const productTagsMap = {};
+  
+        res.data.forEach(({ product_id, tag_name }) => {
+          if (!productTagsMap[product_id]) {
+            productTagsMap[product_id] = [];
+          }
+          productTagsMap[product_id].push(tag_name);
+        });
+  
+        setProducts(products.map(product => ({
+          ...product,
+          tags: productTagsMap[product.id] || []
+        })));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    if (products.length > 0) fetchTagsForProducts();
+  }, [products]);
+  
   useEffect(() => {
     const fetchAverageRatings = async () => {
       const ratings = {};
@@ -105,42 +129,57 @@ const Products = () => {
     product.prod_description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleTagSelection = (e) => {
-    const selectedTags = Array.from(e.target.selectedOptions, (option) => option.value);
-    setTagsInput(selectedTags);  // Store the selected tags into state
-  };
-  
-  const handleAddTags = async () => {
-    if (!currentProduct || tagsInput.length === 0) return;
-  
-    try {
-      // Use the tag IDs directly from tagsInput
-      for (let tagId of tagsInput) {
-        // Associate the product with the tag in the 'product_tags' table using the tagId
-        await axios.post(
-          `http://localhost:8800/product_tags`,
-          { product_id: currentProduct.id, tag_id: tagId },
-          { headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-  
-      // After adding, update product tags in state
-      setProducts(products.map((product) =>
-        product.id === currentProduct.id
-          ? { ...product, tags: [...product.tags, ...tagsInput] }
-          : product
-      ));
-  
-      // Close the modal and reset the inputs
-      setShowTagModal(false);
-      setTagsInput([]);  // Clear the tags input
-      setNewTag('');  // Clear the new tag input
-    } catch (err) {
-      console.error('Error adding tags:', err);
-    }
-  };
-  
  
+const handleAddTags = async () => {
+  if (!currentProduct || tagsInput.length === 0) return;
+
+  try {
+    // Iterate through the selected tag IDs (which are stored in tagsInput)
+    for (let tagId of tagsInput) {
+      // Associate the product with the tag ID in the 'product_tags' table
+      await axios.post(
+        `http://localhost:8800/product_tags`,
+        { product_id: currentProduct.id, tag_id: tagId },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // After adding, update product tags in state
+    setProducts(products.map((product) =>
+      product.id === currentProduct.id
+        ? { ...product, tags: [...product.tags, ...tagsInput] }  // Add the tag IDs to the product tags
+        : product
+    ));
+
+    // Close the modal and reset the inputs
+    setShowTagModal(false);
+    setTagsInput([]);  // Clear the tags input
+    setNewTag('');  // Clear the new tag input
+  } catch (err) {
+    console.error('Error adding tags:', err);
+  }
+};
+const handleTagSelection = (selectedTags) => {
+  // Debugging log to see what tags are selected
+  console.log('Selected Tags:', selectedTags);
+  console.log('Existing Tags:', existingTags);
+
+  // Map the selected tag names to their corresponding tag IDs
+  const selectedTagIds = selectedTags.map(tagName => {
+    // Find the tag in existingTags that matches the name
+    const tag = existingTags.find(tag => tag.name === tagName);
+
+    // If a matching tag is found, return its id, otherwise return null
+    return tag ? tag.id : null;
+  }).filter(tagId => tagId !== null); // Filter out any null values
+
+  // Log the tag IDs to verify they are correct
+  console.log('Selected Tag IDs:', selectedTagIds);
+
+  // Store the tag IDs in state or proceed with further logic
+  setTagsInput(selectedTagIds);  // Assuming you want to set them in state
+};
+
 
   const handleNewTagChange = (e) => {
     setNewTag(e.target.value);  // Update new tag input state

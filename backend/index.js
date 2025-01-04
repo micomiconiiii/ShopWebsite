@@ -725,3 +725,24 @@ app.post('/tags', (req, res) => {
       res.json(result);
     });
   });
+  app.get('/product_tags', async (req, res) => {
+    try {
+      const query = `
+        SELECT pt.product_id, t.name AS tag_name
+        FROM product_tags pt
+        JOIN tags t ON pt.tag_id = t.id
+      `;
+  
+      db.query(query, (err, results) => {
+        if (err) {
+          console.error('Error fetching product tags:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+  
+        res.json(results);
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
