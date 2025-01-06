@@ -15,7 +15,9 @@ const AddUser = () => {
   const [errorMessage, setErrorMessage] = useState(""); // Password mismatch error
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-
+  const [otp, setOtp] = useState(""); // OTP state
+  const [otpSent, setOtpSent] = useState(false); // Track if OTP has been sent
+  const [otpError, setOtpError] = useState(""); // OTP error state
   const handleDisagree = () => {
     setShowModal(false);
     setUser({
@@ -28,7 +30,29 @@ const AddUser = () => {
     setError("Account creation canceled as the terms were not accepted.");
     localStorage.clear();
   };
+  // Handle OTP submission
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setOtpError(""); // Clear previous OTP error messages
+    
+    try {
+      const response = await axios.post("http://localhost:8800/verify-otp", {
+        email: user.email,
+        otp: otp,
+      });
 
+      if (response.data.success) {
+        // Proceed with user creation after OTP verification
+        handleUserCreation();
+      } else {
+        setOtpError("Invalid OTP. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setOtpError("Error verifying OTP. Please try again.");
+    }
+  };
+  
   // Handle input changes dynamically
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,16 +110,33 @@ const AddUser = () => {
   };
 
   // Handle form submission
-  const handleClick = (e) => {
-    e.preventDefault(); // Prevent form submission
+// Handle form submission to send OTP
+const handleClick = async (e) => {
+  e.preventDefault();
+  setError(""); // Reset general error
 
-    // If role is admin, show modal to confirm agreement
-    if (user.role.toLowerCase() === "admin") {
-      setShowModal(true);
-    } else {
-      handleUserCreation(); // Proceed with user creation
+  // If role is admin, show modal for agreement
+  if (user.role.toLowerCase() === "admin") {
+    setShowModal(true);
+  } else {
+    try {
+      const otpResponse = await axios.post("http://localhost:8800/send-email", {
+        email: user.email,
+        name: user.name,
+      });
+
+      if (otpResponse.data.success) {
+        setOtpSent(true); // Mark OTP as sent
+        alert("OTP sent to your email!");
+      } else {
+        setError("Failed to send OTP.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error sending OTP. Please try again.");
     }
-  };
+  }
+};
 
   return (
     <div className="add-user-container">
@@ -147,24 +188,30 @@ const AddUser = () => {
 
         {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-        <div className="form-group">
-          <select
-            name="role"
-            value={user.role}
-            onChange={handleChange}
-            className="role-select"
-          >
-            <option value="user">Customer</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-
+        
         <button type="submit" className="submit-button">
           Add User
         </button>
         
         {error && <p className="error-message">{error}</p>}
       </form>
+      {otpSent && (
+        <form onSubmit={handleOtpSubmit}>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Enter OTP sent to your email"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="submit-button">
+            Verify OTP
+          </button>
+          {otpError && <p className="error-message">{otpError}</p>}
+        </form>
+      )}
 
       {showModal && (
         <div className="modal">

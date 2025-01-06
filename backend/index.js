@@ -5,8 +5,15 @@ import jwt from "jsonwebtoken"; // for generating JWT
 import cors from 'cors';
 import session from 'express-session';
 const app = express();
-
-
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
+// Define __dirname manually
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(session({
     secret: 'your_secret_key', // Change this to a strong, unique secret
@@ -175,10 +182,21 @@ app.post("/logout", (req, res) => {
 app.get("/products", (req, res) => {
     const q = "SELECT * FROM products";
     db.query(q, (err, data) => {
-        if (err) return res.json(err);
-        return res.json(data);
+      if (err) return res.json(err);
+  
+      // Modify the data to include the full image URL
+      const productsWithImageUrls = data.map(product => {
+        if (product.image) {
+          // Prepend the base URL (make sure this matches your server's URL and static path)
+          product.image = `http://localhost:8800/${product.image}`;
+        }
+        return product;
+      });
+  
+      return res.json(productsWithImageUrls);
     });
-});
+  });
+  
 const isAuthenticated = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', ''); // Get the token from Authorization header
 
@@ -265,7 +283,7 @@ app.get("/user/:userId", isAuthenticated, (req, res) => {
     const userId = req.params.userId;
     console.log("Received request to fetch user:", userId);
 
-    const userQuery = `SELECT * FROM users WHERE userID = ?`;
+    const userQuery = `SELECT userID, name, image_path FROM users WHERE userID = ?`; // Ensure image_path is included
     db.query(userQuery, [userId], (err, userResults) => {
         if (err) {
             console.error("Database Error:", err.message);
@@ -276,10 +294,19 @@ app.get("/user/:userId", isAuthenticated, (req, res) => {
             return res.status(404).json({ error: `User with ID ${userId} not found` });
         }
 
-        console.log("User fetched successfully:", userResults[0]);
-        res.status(200).json(userResults[0]);
+        // Assuming image_path is stored in the user data and the user has an image
+        const user = userResults[0];
+        console.log("User fetched successfully:", user);
+
+        // Send the user data including image_path
+        res.status(200).json({
+            userID: user.userID,
+            name: user.name,
+            image_path: user.image_path,  // Include image_path in the response
+        });
     });
 });
+
 
 
 
@@ -383,6 +410,72 @@ app.put("/products/:id", async (req, res) => {
         return res.json({ message: "product updated successfully" });
     });
 });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Directory to store uploaded files
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`); // Generate a unique file name
+    },
+  });
+  
+  const upload = multer({ storage });
+  // Serve uploaded images
+
+// Route to handle product creation with an image
+app.post('/products/addimage', upload.single('image'), async (req, res) => {
+    console.log('Request Body:', req.body);
+    console.log('Uploaded File:', req.file);
+  
+    try {
+      const { prod_name, prod_description, price, stock, category } = req.body;
+      let imagePath = null;
+  
+      if (req.file) {
+        // Normalize the file path
+        imagePath = req.file.path.replace(/\\/g, '/');
+        console.log('Normalized Image Path:', imagePath);
+      }
+  
+      // Ensure all required fields are present
+      if (!prod_name || !prod_description || !price || !stock || !category) {
+        return res.status(400).send('All fields are required');
+      }
+  
+      // Prepare the new product object
+      const newProduct = {
+        prod_name,
+        prod_description,
+        price,
+        stock,
+        category,
+        image: imagePath, // Store the image path (if available)
+      };
+  
+      // Log the product details being added to the database
+      console.log('New product:', newProduct);
+  
+      // Now insert into the database
+      const query = 'INSERT INTO products (prod_name, prod_description, price, stock, category, image) VALUES (?, ?, ?, ?, ?, ?)';
+      const values = [prod_name, prod_description, price, stock, category, imagePath];
+  
+      db.query(query, values, (err, result) => {
+        if (err) {
+          console.error('Error inserting product:', err);
+          return res.status(500).send('Error adding product');
+        }
+  
+        console.log('Product added successfully:', result);
+        res.status(201).send('Product added successfully!');
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error adding product');
+    }
+  });
+  
+  // Configure multer storage
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Route to get a single product by id
 app.get("/products/:id", (req, res) => {
@@ -396,36 +489,54 @@ app.get("/products/:id", (req, res) => {
         return res.json(data[0]); // Return the first (and only) matching product
     });
 });
+app.post('/user/upload-image/:userID', upload.single('image'), (req, res) => {
+    const userID = req.params.userID;
+    const imagePath = 'uploads/' + req.file.filename; // Path to store in database
 
+    // Update the image path in the database
+    const query = 'UPDATE users SET image_path = ? WHERE userID = ?';
+    db.query(query, [imagePath, userID], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Failed to update image.' });
+        }
+        res.status(200).json({ success: true, message: 'Profile picture updated successfully!' });
+    });
+});
 
 // cart class
 // Add item to cart or update existing item
 app.post('/cart/add', (req, res) => {
-    const { userId, shoeId, quantity, cost } = req.body;
+    const { userId, productId, quantity, cost } = req.body;
+    console.log("Received data:", req.body);
 
     // Check if the user already has this product in their cart
     const checkSql = `SELECT * FROM cart_items WHERE user_id = ? AND shoe_id = ?`;
-    db.query(checkSql, [userId, shoeId], (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
+    db.query(checkSql, [userId, productId], (err, result) => {
+        if (err) {
+            console.error('Error in SELECT query:', err.message);
+            return res.status(500).json({ error: 'Failed to check existing cart items' });
+        }
 
         if (result.length > 0) {
-            // If the product is already in the cart, update the quantity
+            // Update the quantity and cost
             const newQuantity = result[0].quantity + quantity;
-            const newCost = result[0].cost * newQuantity;
+            const newCost = result[0].cost * newQuantity; // Verify this calculation logic
             const updateSql = `UPDATE cart_items SET quantity = ?, cost = ? WHERE user_id = ? AND shoe_id = ?`;
-            db.query(updateSql, [newQuantity, newCost, userId, shoeId], (err, updateResult) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Cart item updated' });
-            console.log('New Quantity:', newQuantity);
-            console.log('New Cost:', newCost);
-
+            db.query(updateSql, [newQuantity, newCost, userId, productId], (err) => {
+                if (err) {
+                    console.error('Error in UPDATE query:', err.message);
+                    return res.status(500).json({ error: 'Failed to update cart item' });
+                }
+                res.status(200).json({ message: 'Cart item updated' });
             });
-
         } else {
-            // If the product is not in the cart, insert it as a new item
+            // Insert a new cart item
             const insertSql = `INSERT INTO cart_items (user_id, shoe_id, quantity, cost) VALUES (?, ?, ?, ?)`;
-            db.query(insertSql, [userId, shoeId, quantity, cost], (err, insertResult) => {
-                if (err) return res.status(500).json({ error: err.message });
+            db.query(insertSql, [userId, productId, quantity, cost], (err) => {
+                if (err) {
+                    console.error('Error in INSERT query:', err.message);
+                    return res.status(500).json({ error: 'Failed to add new cart item' });
+                }
                 res.status(201).json({ message: 'Item added to cart' });
             });
         }
@@ -445,7 +556,8 @@ app.post('/cart/add', (req, res) => {
   
   // Update cart item
 app.put('/cart/update', (req, res) => {
-    const { userId, shoeId, quantity, cost } = req.body;
+    const { userId, productId, quantity, cost } = req.body;
+    console.log("Received data:", req.body);
 
     // Ensure all required fields are available
     if (typeof quantity !== 'number' || typeof cost !== 'number') {
@@ -455,7 +567,7 @@ app.put('/cart/update', (req, res) => {
     const updateSql = `UPDATE cart_items SET quantity = ?, cost = ? WHERE user_id = ? AND shoe_id = ?`;
 
     // Execute the update query with the correct values
-    db.query(updateSql, [quantity, cost, userId, shoeId], (err, updateResult) => {
+    db.query(updateSql, [quantity, cost, userId, productId], (err, updateResult) => {
         if (err) return res.status(500).json({ error: err.message });
 
         // Check if any rows were affected (i.e., the update was successful)
@@ -480,27 +592,36 @@ app.put('/cart/update', (req, res) => {
 // Remove user
 app.delete('/user/remove/:userID', (req, res) => {
     const userID = req.params.userID;
+    console.log("User Id: ", userID);
 
+    const deleteOrders = `DELETE FROM orders WHERE userID = ?`;
     const deleteCartItems = `DELETE FROM cart_items WHERE user_id = ?`;
     const deleteUser = `DELETE FROM users WHERE userID = ?`;
 
-    db.query(deleteCartItems, [userID], (err) => {
+    db.query(deleteOrders, [userID], (err) => {
         if (err) {
-            console.error('Error deleting cart items:', err.message);
-            return res.status(500).json({ error: 'Failed to delete cart items' });
+            console.error('Error deleting orders:', err.message);
+            return res.status(500).json({ error: 'Failed to delete orders' });
         }
 
-        db.query(deleteUser, [userID], (err, result) => {
+        db.query(deleteCartItems, [userID], (err) => {
             if (err) {
-                console.error('Error deleting user:', err.message);
-                return res.status(500).json({ error: 'Failed to delete user' });
+                console.error('Error deleting cart items:', err.message);
+                return res.status(500).json({ error: 'Failed to delete cart items' });
             }
 
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'User not found' });
-            }
+            db.query(deleteUser, [userID], (err, result) => {
+                if (err) {
+                    console.error('Error deleting user:', err.message);
+                    return res.status(500).json({ error: 'Failed to delete user' });
+                }
 
-            res.status(200).json({ message: 'Account deleted successfully' });
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: 'User not found' });
+                }
+
+                res.status(200).json({ message: 'Account deleted successfully' });
+            });
         });
     });
 });
@@ -687,7 +808,7 @@ app.post('/reviews', async (req, res) => {
     
         try {
         const averageRating = await getAverageRating(productID);
-        console.log("average rating: " +averageRating);
+        //console.log("average rating: " +averageRating);
         return res.json({ averageRating });
         } catch (err) {
         console.error('Error fetching average rating:', err);
@@ -719,13 +840,14 @@ app.post('/tags', (req, res) => {
   });
   
   // Get Tags (for selection)
-  app.get('/tags', (req, res) => {
+app.get('/tags', (req, res) => {
     db.query('SELECT * FROM tags', (err, result) => {
       if (err) return res.status(500).json({ error: 'Failed to fetch tags' });
       res.json(result);
     });
   });
-  app.get('/product_tags', async (req, res) => {
+
+app.get('/product_tags', async (req, res) => {
     try {
       const query = `
         SELECT pt.product_id, t.name AS tag_name
@@ -746,3 +868,171 @@ app.post('/tags', (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  app.put('/user/update-username/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { newUserName } = req.body;
+
+    console.log('User ID:', userId);
+    console.log('New Username:', newUserName);
+
+    try {
+        // Validate the new username
+        if (!newUserName || newUserName.length < 3) {
+            return res.status(400).json({
+                success: false,
+                message: 'Username must be at least 3 characters long',
+            });
+        }
+
+        // Execute the update query
+        const result = await db.query(
+            'UPDATE users SET name = ? WHERE userID = ?',
+            [newUserName, userId]
+        );
+
+        // Check if any row was affected
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found or no changes were made',
+            });
+        }
+
+        // Respond with success
+        res.json({
+            success: true,
+            message: 'Username updated successfully',
+        });
+    } catch (err) {
+        console.error('Error updating username:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000); 
+
+// Email sending route
+app.post("/send-email", async (req, res) => {
+    const { email, name } = req.body;
+    console.log("Request: ", req.body);
+    const otp = generateOTP(); // Generate OTP
+    global.otpStore = global.otpStore || {}; // This is for demonstration; use a proper store in production
+    global.otpStore[email] = otp;
+
+    // Configure Nodemailer
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'jhondelmico.abas@gmail.com',
+          pass: 'dzoftwlmeylqhand'
+        }
+      });
+      const otpMessage = `
+      Greetings ${name}! 
+      Your OTP is: ${otp}
+      Please enter this OTP to complete your login.
+      Important: This OTP is for your use only. Please do not share it with anyone. We will never ask you for your OTP via phone, email, or text.
+  `;
+    
+    transporter.verify((error, success) => {
+        if (error) {
+            console.log("Error: ", error);
+        } else {
+            console.log("Server is ready to take messages");
+        }
+    });
+    console.log("transporter: ",transporter);
+    const mailOptions = {
+        from: `"Micommerce" <${process.env.EMAIL_USER}>`, // Sender email
+        to: email, // Recipient email
+        subject: "Verify your OTP", // Email subject
+        text: otpMessage, // Email content
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully");
+        res.status(200).send({ success: true, message: "Email sent successfully" });
+    } catch (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send({ success: false, message: "Failed to send email" });
+    }
+}); // tama to
+// testing only
+
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'jhondelmico.abas@gmail.com',
+      pass: 'dzoftwlmeylqhand'
+    }
+  });
+  
+  var mailOptions = {
+    from: 'youremail@gmail.com',
+    to: 'myfriend@yahoo.com',
+    subject: 'Sending Email using Node.js',
+    text: 'That was easy!'
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+
+  // -------
+  let otpStore = {}; // Key: email, Value: OTP
+
+// Send OTP route
+app.post("/send-otp", (req, res) => {
+    const { email } = req.body;
+
+    // Generate a random OTP (6 digits)
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    // Store the OTP associated with the email temporarily (can use a DB in production)
+    otpStore[email] = otp;
+
+    // Send OTP email to user
+    const mailOptions = {
+        from: "your-email@gmail.com",
+        to: email,
+        subject: "Your OTP Code",
+        text: `Your OTP code is: ${otp}\n\nPlease enter it on the website to complete your login.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.error("Error sending OTP:", err);
+            return res.status(500).json({ success: false, message: "Failed to send OTP" });
+        }
+
+        console.log("OTP sent:", info.response);
+        return res.status(200).json({ success: true, message: "OTP sent successfully" });
+    });
+});
+
+// Verify OTP route
+app.post("/verify-otp", (req, res) => {
+    const { email, otp } = req.body;
+    console.log("otp is ", otp);
+    console.log("right otp is: ", global.otpStore[email]);
+    // Check if OTP exists for the email
+    if (!global.otpStore[email]) {
+        return res.status(400).send({ success: false, message: "OTP not found for this email." });
+    }
+
+    // Compare OTP
+    if (global.otpStore[email] === parseInt(otp)) {
+        // OTP is correct, proceed with login
+        delete global.otpStore[email]; // Clear OTP after verification
+        return res.status(200).send({ success: true, message: "OTP verified successfully." });
+    } else {
+        return res.status(400).send({ success: false, message: "Invalid OTP." });
+    }
+});

@@ -15,6 +15,8 @@ import User from "./pages/User";
 import Orders from "./pages/Orders";
 import AdminOrder from "./pages/AdminOrder";
 import AdminUser from "./pages/AdminUser";
+import AddRole from "./pages/AddRole";
+import Otp from "./pages/Otp";
 import "./style.css";
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
           <Route path="/orders" element={<Orders/>}></Route>
           <Route path="/orderdashboard" element={<AdminOrder/>}></Route> 
           <Route path="/showusers" element={<AdminUser/>}></Route>        
+          <Route path="/otp" element={<Otp/>}></Route>        
+          <Route path="/addrole" element={<AddRole/>}></Route>        
         
         </Routes>
       </BrowserRouter>

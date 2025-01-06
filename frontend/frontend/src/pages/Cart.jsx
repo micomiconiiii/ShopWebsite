@@ -45,11 +45,11 @@ const Cart = () => {
         setTotal(totalAmount);
     };
 
-    const updateCartItem = async (productID, action) => {
-        const currentItem = cartItems.find(item => item.shoe_id === productID);
-        const response = await axios.get(`http://localhost:8800/products/${productID}`);
+    const updateCartItem = async (productId, action) => {
+        const currentItem = cartItems.find(item => item.shoe_id === productId);
+        const response = await axios.get(`http://localhost:8800/products/${productId}`);
         const shoe = response.data;
-
+        console.log("Product: ", shoe);
         if (!currentItem || !shoe) return;
 
         let newQuantity = currentItem.quantity;
@@ -64,14 +64,14 @@ const Cart = () => {
         try {
             await axios.put('http://localhost:8800/cart/update', {
                 userId,
-                productID,
+                productId,
                 quantity: newQuantity,
                 cost: newCost
             });
 
             setCartItems((prevItems) => {
                 const updatedItems = prevItems.map((item) =>
-                    item.shoe_id === productID ? { ...item, quantity: newQuantity } : item
+                    item.shoe_id === productId ? { ...item, quantity: newQuantity } : item
                 );
                 calculateTotal(updatedItems);
                 return updatedItems;
@@ -202,8 +202,9 @@ const Cart = () => {
             </table>
 
             <div className="cart-summary">
-                <h2>Total: ${total.toFixed(2)}</h2>
                 <h2>Total for Selected Items: ${selectedTotal.toFixed(2)}</h2>
+                <h3>Total inside the Cart: ${total.toFixed(2)}</h3>
+                
             </div>
 
             <div className="shipping-address">

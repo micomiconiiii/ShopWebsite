@@ -13,6 +13,10 @@ const Products = () => {
   const [rating, setAverageRatings] = useState([]);
   const [categories, setCategories] = useState([]); // Store category list
   const [selectedCategory, setSelectedCategory] = useState(''); // Store selected category
+  const [tags, setTags] = useState([]);
+  const [uniqueTags, setUniqueTags] = useState([]); // Store unique tags
+  const [selectedTag, setSelectedTag] = useState(''); // Store selected tag
+
 
   // Fetch all products data
   useEffect(() => {
@@ -29,6 +33,31 @@ const Products = () => {
     };
     fetchAllProducts();
   }, []);
+
+  // fetch tags
+  useEffect(() => {
+    const fetchProductTags = async () => {
+      try {
+        const res = await axios.get('http://localhost:8800/product_tags');
+        const tagMap = {};
+        res.data.forEach((tag) => {
+          if (!tagMap[tag.product_id]) {
+            tagMap[tag.product_id] = [];
+          }
+          tagMap[tag.product_id].push(tag.tag_name);
+        });
+        setTags(tagMap);
+
+        // Extract unique tags for filtering
+        const allTags = res.data.map((tag) => tag.tag_name);
+        setUniqueTags([...new Set(allTags)]);
+      } catch (err) {
+        console.error('Error fetching product tags:', err);
+      }
+    };
+    fetchProductTags();
+  }, []);
+
 
   // Fetch average ratings
   useEffect(() => {
@@ -85,9 +114,14 @@ const Products = () => {
     if (selectedCategory) {
       filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
     }
+    if (selectedTag) {
+      filteredProducts = filteredProducts.filter((product) =>
+        tags[product.id]?.includes(selectedTag)
+      );
+    }
 
     setSortedProducts(filteredProducts);
-  }, [products, sortOption, selectedCategory]); // Added selectedCategory to dependencies
+  }, [products, sortOption, selectedCategory, selectedTag]); // Added selectedCategory to dependencies
 
   // Filter products based on search query
   const filteredProducts = sortedProducts.filter((product) =>
@@ -193,7 +227,22 @@ const Products = () => {
           Warning: Some products have low stocks!
         </p>
       )}
-
+      {/* Tag Filter */}
+      <div>
+        <label htmlFor="tagFilter">Filter by Tag:</label>
+        <select
+          id="tagFilter"
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+        >
+          <option value="">All Tags</option>
+          {uniqueTags.map((tag, index) => (
+            <option key={index} value={tag}>
+              {tag}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="products">
         {filteredProducts.map((product) => (
           <div
@@ -212,6 +261,10 @@ const Products = () => {
               Stock: {product.stock}
             </span>
             <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
+            <p>
+              Tags:{' '}
+              {tags[product.id]?.length > 0 ? tags[product.id].join(', ') : 'No tags available'}
+            </p>
             <div>
               <button onClick={() => addItemToCart(product.id)}>Add to Cart</button>
             </div>

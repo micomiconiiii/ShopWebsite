@@ -16,7 +16,12 @@ const Products = () => {
   const [tagsInput, setTagsInput] = useState([]);
   const [existingTags, setExistingTags] = useState([]);
   const [newTag, setNewTag] = useState('');  // New state to store the new tag input
-
+ 
+  useEffect(() => {
+    if (!userName) {
+      navigate('/login');
+    }
+  }, [userName, navigate]);
   useEffect(() => {
     const fetchExistingTags = async () => {
       try {
@@ -221,7 +226,7 @@ const handleTagSelection = (selectedTags) => {
   };
 
   const addUser = () => {
-    navigate('/register');
+    navigate('/addrole');
   };
 
   return (
