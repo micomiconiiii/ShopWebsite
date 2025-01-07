@@ -1,10 +1,14 @@
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: Arial, Helvetica, sans-serif;
+ 
 }
 
 code {
@@ -155,15 +159,6 @@ code {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-.App{
-    height: 100vh;
-    padding: 0px 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-
-}
 
 .products{
     display: flex;
@@ -189,4 +184,110 @@ img{
     display: flex;
     flex-direction: column; 
     gap: 20px;
+}
+/* Ensure the body uses a consistent font and padding */
+
+
+
+/* Flex container for the products list */
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+/* Each product card */
+.product {
+  flex: 1 1 calc(33% - 20px); /* Default to 3 items per row */
+  box-sizing: border-box;
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.product img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Handle low stock and out of stock styling */
+.product[style*="background-color: #d3d3d3"] {
+  opacity: 0.6;
+}
+
+/* Form elements styling */
+select, input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .products {
+    flex-direction: column;
+  }
+
+  .product {
+    flex: 1 1 100%; /* Stack products in a single column */
+  }
+
+  /* Adjust form elements to full width on smaller screens */
+  select, input {
+    width: 100%;
+  }
+
+  /* Adjust buttons to be block level on smaller screens */
+  button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .product {
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  .product p {
+    font-size: 0.9rem;
+  }
+
+  /* Make the sort dropdown and search input more user-friendly */
+  label {
+    font-size: 1rem;
+  }
+
+  select, input[type="text"] {
+    font-size: 1rem;
+  }
+}
+
+/* Additional responsiveness for very small devices */
+@media (max-width: 480px) {
+  .products {
+    flex-direction: column;
+  }
+
+  .product {
+    flex: 1 1 100%; /* Stack products in a single column */
+  }
+
+  /* Smaller font size for mobile devices */
+  h2 {
+    font-size: 1rem;
+  }
+
+  .product p {
+    font-size: 0.8rem;
+  }
 }

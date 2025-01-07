@@ -15,9 +15,9 @@ const User = () => {
     const [image, setImage] = useState(null); // State to hold the image file
     const [imagePreview, setImagePreview] = useState(null); // Preview of the image
     const [profileImage, setProfileImage] = useState(null); // New state for profile image
-    const [selectedImage, setSelectedImage] = useState(null); // New state for selected image file
     const userID = localStorage.getItem('userID');
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role'); // Get the role from localStorage
 
     useEffect(() => {
         if (!userID || !token) {
@@ -250,7 +250,9 @@ const User = () => {
             <button onClick={handleDeleteAccount} style={{ backgroundColor: 'red', color: 'white' }}>
                 Delete Account
             </button>
-            <button><Link to="/home">Back</Link></button>
+            <button>
+                <Link to={role === 'admin' ? '/products' : '/home'}>Back</Link>
+            </button>
         </div>
     );
 };

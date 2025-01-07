@@ -1,0 +1,111 @@
+/* Root container taking the full viewport */
+.landing-page {
+    background-image: url("D:/Documents/JHONDEL MICO ABAS/TUP/Web Development/project-ecommerce/backend/uploads/UI (1920 x 1080 px).png"); /* Replace with your image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space between navbar and hero-section */
+}
+
+/* Navbar styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: transparent; /* Semi-transparent black */
+    width: 100%; /* Full width of the viewport */
+    color: white;
+    box-sizing: border-box; /* Includes padding in total width/height */
+}
+
+/* Navbar links */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1rem;
+    font-weight: bold;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Logo */
+.logo-img {
+    height: 50px;
+    width: auto; /* Keeps aspect ratio */
+}
+
+/* Hero section */
+.hero-section {
+    flex: 1; /* Fills remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Pushes content to the bottom */
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding-bottom: 9rem; /* Adds spacing from the bottom */
+    box-sizing: border-box; /* Ensures padding doesn't affect layout */
+}
+
+/* Hero image */
+.hero-img {
+    max-width: 80%;
+    height: auto; /* Maintain aspect ratio */
+    margin-bottom: rem;
+}
+
+/* Browse button */
+.browse-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    color: #FFFFF0; /* Pale white text color */
+    background-color: transparent; /* Transparent background */
+    border: 2px solid #FFFFF0; /* White outline */
+    border-radius: 25px; /* Fully rounded corners */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth hover effect */
+}
+
+.browse-btn:hover {
+    background-color: rgba(255, 255, 240, 0.1); /* Slightly transparent pale white on hover */
+    color: #FFFFFF; /* Change text to full white on hover */
+    border-color: #FFFFFF; /* Slightly bolder outline on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .nav-links a {
+        margin: 0.5rem 0;
+    }
+
+    .hero-img {
+        max-width: 100%;
+    }
+
+    .browse-btn {
+        width: 80%;
+    }
+}

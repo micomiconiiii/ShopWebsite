@@ -138,97 +138,103 @@ const handleClick = async (e) => {
   }
 };
 
-  return (
-    <div className="add-user-container">
-      <h1>Add New User</h1>
-      <form className="add-user-form" onSubmit={handleClick}>
+return (
+  <div className="add-user-container">
+    <h1 className="form-header">Sign Up</h1>
+    <form className="add-user-form" onSubmit={handleClick}>
+      <div className="form-group">
+        <input
+          type="text"
+          placeholder="Full Name"
+          name="name"
+          value={user.name}
+          onChange={handleChange}
+          required
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <input
+          type="email"
+          placeholder="Email Address"
+          name="email"
+          value={user.email}
+          onChange={handleChange}
+          required
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <input
+          type="password"
+          placeholder="Password"
+          name="password"
+          value={user.password}
+          onChange={handleChange}
+          required
+          className="form-input"
+        />
+      </div>
+
+      <div className="form-group">
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          name="confirmPassword"
+          value={user.confirmPassword}
+          onChange={handleChange}
+          required
+          className="form-input"
+        />
+      </div>
+
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+      <button type="submit" className="submit-button">
+        Add User
+      </button>
+
+      {error && <p className="error-message">{error}</p>}
+    </form>
+    
+    {otpSent && (
+      <form onSubmit={handleOtpSubmit}>
         <div className="form-group">
           <input
             type="text"
-            placeholder="Full Name"
-            name="name"
-            value={user.name}
-            onChange={handleChange}
+            placeholder="Enter OTP sent to your email"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
             required
+            className="form-input"
           />
         </div>
-
-        <div className="form-group">
-          <input
-            type="email"
-            placeholder="Email Address"
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            value={user.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            name="confirmPassword"
-            value={user.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-        
         <button type="submit" className="submit-button">
-          Add User
+          Verify OTP
         </button>
-        
-        {error && <p className="error-message">{error}</p>}
+        {otpError && <p className="error-message">{otpError}</p>}
       </form>
-      {otpSent && (
-        <form onSubmit={handleOtpSubmit}>
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Enter OTP sent to your email"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="submit-button">
-            Verify OTP
-          </button>
-          {otpError && <p className="error-message">{otpError}</p>}
-        </form>
-      )}
+    )}
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Admin Terms and Conditions</h3>
-            <p>
-              By selecting the "Admin" role, you agree to the terms and
-              conditions. Admins are responsible for managing sensitive
-              information and ensuring platform security.
-            </p>
-            <button onClick={closeModal}>I Agree</button>
-            <button onClick={handleDisagree}> I Disagree </button>
-          </div>
+    {showModal && (
+      <div className="modal">
+        <div className="modal-content">
+          <h3>Admin Terms and Conditions</h3>
+          <p>
+            By selecting the "Admin" role, you agree to the terms and
+            conditions. Admins are responsible for managing sensitive
+            information and ensuring platform security.
+          </p>
+          <button onClick={closeModal} className="modal-button">I Agree</button>
+          <button onClick={handleDisagree} className="modal-button"> I Disagree </button>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 };
+
 
 export default AddUser;

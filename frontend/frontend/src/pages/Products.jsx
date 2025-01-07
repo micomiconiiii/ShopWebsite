@@ -164,6 +164,17 @@ const handleAddTags = async () => {
     console.error('Error adding tags:', err);
   }
 };
+const goToUserPage = () => {
+  const userID = localStorage.getItem('userID');
+  const token = localStorage.getItem('token');
+
+  if (userID && token) {
+    navigate('/user');
+  } else {
+    navigate('/login');
+  }
+};
+
 const handleTagSelection = (selectedTags) => {
   // Debugging log to see what tags are selected
   console.log('Selected Tags:', selectedTags);
@@ -345,6 +356,8 @@ const handleTagSelection = (selectedTags) => {
         ) : (
           <button className="logout-btn" onClick={handleLogout}>Log out</button>
         )}
+        <button onClick={goToUserPage}>Go to User Page</button>
+      
       </div>
     </div>
   );

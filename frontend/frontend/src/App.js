@@ -17,6 +17,7 @@ import AdminOrder from "./pages/AdminOrder";
 import AdminUser from "./pages/AdminUser";
 import AddRole from "./pages/AddRole";
 import Otp from "./pages/Otp";
+import LandingPage from "./pages/LandingPage";
 import "./style.css";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/showusers" element={<AdminUser/>}></Route>        
           <Route path="/otp" element={<Otp/>}></Route>        
           <Route path="/addrole" element={<AddRole/>}></Route>        
+          <Route path="/landingpage" element={<LandingPage/>}></Route>        
         
         </Routes>
       </BrowserRouter>

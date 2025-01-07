@@ -244,33 +244,33 @@ const Products = () => {
         </select>
       </div>
       <div className="products">
-        {filteredProducts.map((product) => (
-          <div
-            className="product"
-            key={product.id}
-            style={{
-              backgroundColor: product.stock === 0 ? '#d3d3d3' : 'white',
-              opacity: product.stock === 0 ? 0.6 : 1,
-            }}
-          >
-            {product.image && <img src={product.image} alt={product.prod_name} />}
-            <h2>{product.prod_name}</h2>
-            <p>{product.prod_description}</p>
-            <span>Price: ${product.price}</span>
-            <span style={{ color: product.stock < 10 ? 'red' : 'black' }}>
-              Stock: {product.stock}
-            </span>
-            <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
-            <p>
-              Tags:{' '}
-              {tags[product.id]?.length > 0 ? tags[product.id].join(', ') : 'No tags available'}
-            </p>
-            <div>
-              <button onClick={() => addItemToCart(product.id)}>Add to Cart</button>
-            </div>
-          </div>
-        ))}
+  {filteredProducts.map((product) => (
+    <div
+      className="product"
+      key={product.id}
+      style={{
+        backgroundColor: product.stock === 0 ? '#d3d3d3' : 'white',
+        opacity: product.stock === 0 ? 0.6 : 1,
+      }}
+    >
+      {product.image && <img src={product.image} alt={product.prod_name} />}
+      <h2>{product.prod_name}</h2>
+      <p>{product.prod_description}</p>
+      <span>Price: ${product.price}</span>
+      <span style={{ color: product.stock < 10 ? 'red' : 'black' }}>
+        Stock: {product.stock}
+      </span>
+      <p>Rating: {rating[product.id] === 0 ? "No ratings yet" : rating[product.id]?.toFixed(2)}</p>
+      <p>
+        Tags:{' '}
+        {tags[product.id]?.length > 0 ? tags[product.id].join(', ') : 'No tags available'}
+      </p>
+      <div>
+        <button onClick={() => addItemToCart(product.id)}>Add to Cart</button>
       </div>
+    </div>
+  ))}
+</div>
 
       <button>
         <Link to="/cart">Show Cart</Link>
