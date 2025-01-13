@@ -1,4 +1,7 @@
-/* General Styles */
+/* Apply Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* General reset */
 * {
     margin: 0;
     padding: 0;
@@ -6,153 +9,168 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f9;
     color: #333;
 }
 
+/* Cart Container */
 .cart-container {
     width: 80%;
-    margin: 0 auto;
+    margin: 100px auto;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
+    background-color: white;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cart-title {
-    font-size: 2rem;
     text-align: center;
+    font-size: 2em;
     margin-bottom: 20px;
+    color: #333;
 }
 
+/* Cart Table */
 .cart-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .cart-table th, .cart-table td {
-    padding: 10px;
+    padding: 15px;
     text-align: left;
+    border-bottom: 1px solid #ddd;
 }
 
 .cart-table th {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.cart-table tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #f8f8f8;
 }
 
 .cart-table td button {
-    padding: 5px 10px;
-    border: none;
-    background-color: #ff6666;
+    background-color: #202020;
     color: white;
+    border: none;
+    padding: 5px 10px;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    border-radius: 4px;
 }
 
 .cart-table td button:hover {
-    background-color: #ff4d4d;
+    background-color: #c0392b;
 }
 
+.cart-table input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Cart Summary */
 .cart-summary {
+    display: flex;
+    justify-content: space-between;
     margin-top: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
 }
 
-.shipping-address,
-.payment-method {
-    margin: 20px 0;
+.cart-summary h2 {
+    font-weight: 600;
 }
 
-.shipping-address textarea,
-.payment-method select,
-.payment-method input {
+.cart-summary h3 {
+    font-weight: 400;
+}
+
+/* Shipping Address */
+.shipping-address {
+    margin-top: 20px;
+}
+
+.shipping-address label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.shipping-address textarea {
     width: 100%;
     padding: 10px;
-    margin-top: 10px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    border-radius: 4px;
+    border: 1px solid #ddd;
 }
 
+/* Payment Method */
+.payment-method {
+    margin-top: 20px;
+}
+
+.payment-method select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Payment Form */
 .payment-form {
     margin-top: 20px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.payment-form h3 {
-    margin-bottom: 15px;
 }
 
 .payment-form input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
 }
 
+/* Checkout Button */
 .checkout-btn {
-    width: 100%;
-    padding: 15px;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border-radius: 5px;
-    border: none;
-    transition: background-color 0.3s;
-}
-
-.checkout-btn:hover {
-    background-color: #45a049;
-}
-
-.back-to-home {
-    display: block;
     text-align: center;
-    margin-top: 10px;
-    font-size: 1rem;
-    color: #007BFF;
+    margin-top: 30px;
+    background-color: #F27405;
+    border-color: #F27405;
+}
+
+.checkout-btn button {
+    padding: 12px 25px;
+    background-color: #082816;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checkout-btn button:hover {
+    background-color: #27ae60;
+}
+
+
+.navbar-1 {
+    position: fixed;
+    padding: 15px;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: #1c1b1b; 
+}
+ 
+
+  .logo-img {
+    max-height: 50px; /* Adjust the size of the logo */
+  }
+  
+  .nav-links{
+    color:#1c1b1b;
     text-decoration: none;
-}
-
-.back-to-home:hover {
+    margin: 0 10px;
+    font-size: 18px;
+  }
+  
+  .nav-links a:hover {
     text-decoration: underline;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .cart-container {
-        width: 90%;
-    }
-
-    .cart-table td, .cart-table th {
-        font-size: 0.9rem;
-    }
-
-    .checkout-btn {
-        font-size: 1rem;
-    }
-
-    .shipping-address textarea,
-    .payment-method select,
-    .payment-method input {
-        font-size: 0.9rem;
-    }
-
-    .payment-form input {
-        font-size: 0.9rem;
-    }
-}
+  }
+  .back-to-home {
+    background-color:#1c1b1b;
+    color: white;
+  }
+  

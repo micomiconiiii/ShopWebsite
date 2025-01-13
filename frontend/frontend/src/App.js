@@ -19,13 +19,13 @@ import AddRole from "./pages/AddRole";
 import Otp from "./pages/Otp";
 import LandingPage from "./pages/LandingPage";
 import "./style.css";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   return (
     <div className="App">
      <BrowserRouter>
         <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LandingPage/>} />
         
           <Route path="/products" element={<Products/>}></Route>
           <Route path="/add" element={<Add/>}></Route>          

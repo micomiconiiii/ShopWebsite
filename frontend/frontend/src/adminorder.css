@@ -1,0 +1,230 @@
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+
+
+.orders-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding:50px;
+  padding-top: 0px;
+}
+
+/* Order Card */
+.order-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  min-height: 400px;
+}
+
+.order-card:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+.order-header h2 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.order-header p {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #555;
+}
+
+/* Items List */
+.order-items {
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+}
+
+.order-items h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #4CAF50;
+}
+
+.items-list .item {
+  margin-bottom: 10px;
+}
+
+.items-list .item p {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #555;
+}
+
+/* Actions Section */
+.order-actions {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.action .minimal-btn {
+  flex: 1;
+  padding: 15px;
+  font-size: 14px;
+  margin-right: 15px ;
+  text-align: center;
+  border: 1px solid #333;
+  border-radius: 20px;
+  background: none;
+  color: #444;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.action .minimal-btn:hover {
+  flex: 1;
+  padding: 15px;
+  font-size: 14px;
+  margin-right: 15px ;
+  text-align: center;
+  border: 1px solid #333;
+  border-radius: 20px;
+  background: #F29F05;
+  color: #f9f8fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.order-actions .minimal-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #333;
+  border-radius: 20px;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.order-actions .minimal-btn:hover {
+  background-color: #F29F05;
+  color: white;
+  border: none;
+}
+
+/* Update Modal */
+.update-order-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-height: fit-content;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.update-order-modal h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.update-order-modal input,
+.update-order-modal select {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.update-order-modal button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+
+
+.update-order-modal button[type="button"] {
+  background-color: #ff4d4d;
+  color: white;
+}
+
+.update-order-modal button[type="button"]:hover {
+  background-color: #e43e3e;
+}
+
+/* Back Button */
+.back-button {
+  text-align: center;
+  margin: 20px;
+}
+
+
+/* General Utilities */
+.filters {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px;
+}
+
+.filters .search-input,
+.filters .sort-options {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.filters input:last-child,
+.filters select:last-child {
+  margin-right: 0;
+}
+.back{
+  margin: 1em;
+  padding: 10px;
+  padding-right: 15px;
+  padding-left: 15px;
+  background-color: #F29F05;
+  border: none;
+  border-radius: 5px;
+ 
+}
+.back a{
+  text-decoration: none;
+  color: #f9f8fa;
+
+}
+.back:hover{
+  background-color: #333;
+}

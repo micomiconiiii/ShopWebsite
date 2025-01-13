@@ -34,7 +34,8 @@ const AddUser = () => {
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setOtpError(""); // Clear previous OTP error messages
-    
+    console.log("Submitting OTP:", otp); // Debugging line
+
     try {
       const response = await axios.post("http://localhost:8800/verify-otp", {
         email: user.email,
@@ -114,6 +115,10 @@ const AddUser = () => {
 const handleClick = async (e) => {
   e.preventDefault();
   setError(""); // Reset general error
+  
+    // Save the email and name in localStorage before sending OTP
+    localStorage.setItem("userEmail", user.email); // Store the user's email
+    localStorage.setItem("userName", user.name); // Store the user's name
 
   // If role is admin, show modal for agreement
   if (user.role.toLowerCase() === "admin") {
@@ -137,101 +142,114 @@ const handleClick = async (e) => {
     }
   }
 };
-
 return (
-  <div className="add-user-container">
-    <h1 className="form-header">Sign Up</h1>
-    <form className="add-user-form" onSubmit={handleClick}>
-      <div className="form-group">
-        <input
-          type="text"
-          placeholder="Full Name"
-          name="name"
-          value={user.name}
-          onChange={handleChange}
-          required
-          className="form-input"
-        />
-      </div>
+  <div className="register-container">
+    <div className="register-form-container">
+      {/* Left Side of the form */}
+      <div className="left-section">
+        <div className="content text-center">
+          <h2 className="mb-4">Sign Up</h2>
+          {!otpSent ? (
+            // Sign Up form
+            <form onSubmit={handleClick}>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  name="name"
+                  value={user.name}
+                  onChange={handleChange}
+                  required
+                  className="form-control input-box"
+                  
+                />
+              </div>
 
-      <div className="form-group">
-        <input
-          type="email"
-          placeholder="Email Address"
-          name="email"
-          value={user.email}
-          onChange={handleChange}
-          required
-          className="form-input"
-        />
-      </div>
+              <div className="mb-3">
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  name="email"
+                  value={user.email}
+                  onChange={handleChange}
+                  required
+                  className="form-control input-box"
+                />
+              </div>
 
-      <div className="form-group">
-        <input
-          type="password"
-          placeholder="Password"
-          name="password"
-          value={user.password}
-          onChange={handleChange}
-          required
-          className="form-input"
-        />
-      </div>
+              <div className="mb-3">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  value={user.password}
+                  onChange={handleChange}
+                  required
+                  className="form-control input-box"
+                />
+              </div>
 
-      <div className="form-group">
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          name="confirmPassword"
-          value={user.confirmPassword}
-          onChange={handleChange}
-          required
-          className="form-input"
-        />
-      </div>
+              <div className="mb-3">
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  name="confirmPassword"
+                  value={user.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="form-control input-box"
+                />
+              </div>
 
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
+              {errorMessage && <p className="text-danger">{errorMessage}</p>}
 
-      <button type="submit" className="submit-button">
-        Add User
-      </button>
+              <button type="submit" className="btn w-100 button">
+                Sign Up
+              </button>
 
-      {error && <p className="error-message">{error}</p>}
-    </form>
-    
-    {otpSent && (
-      <form onSubmit={handleOtpSubmit}>
-        <div className="form-group">
-          <input
-            type="text"
-            placeholder="Enter OTP sent to your email"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            required
-            className="form-input"
-          />
+              {error && <p className="text-danger">{error}</p>}
+            </form>
+          ) : (
+            // OTP form
+            <form onSubmit={handleOtpSubmit}>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="Enter OTP sent to your email"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  className="form-control input-box"
+                />
+              </div>
+              <button type="submit" className="btn btn-primary w-100 button">
+                Verify OTP
+              </button>
+              {otpError && <p className="text-danger">{otpError}</p>}
+            </form>
+          )}
+
+          {/* Admin Terms and Conditions Modal */}
+          {showModal && (
+            <div className="modal">
+              <div className="modal-content">
+                <h3>Admin Terms and Conditions</h3>
+                <p>
+                  By selecting the "Admin" role, you agree to the terms and
+                  conditions. Admins are responsible for managing sensitive
+                  information and ensuring platform security.
+                </p>
+                <button onClick={closeModal} className="modal-button">I Agree</button>
+                <button onClick={handleDisagree} className="modal-button"> I Disagree </button>
+              </div>
+            </div>
+          )}
         </div>
-        <button type="submit" className="submit-button">
-          Verify OTP
-        </button>
-        {otpError && <p className="error-message">{otpError}</p>}
-      </form>
-    )}
-
-    {showModal && (
-      <div className="modal">
-        <div className="modal-content">
-          <h3>Admin Terms and Conditions</h3>
-          <p>
-            By selecting the "Admin" role, you agree to the terms and
-            conditions. Admins are responsible for managing sensitive
-            information and ensuring platform security.
-          </p>
-          <button onClick={closeModal} className="modal-button">I Agree</button>
-          <button onClick={handleDisagree} className="modal-button"> I Disagree </button>
-        </div>
       </div>
-    )}
+
+      {/* Right side: background image */}
+      <div className="right-section"></div>
+    </div>
   </div>
 );
 };

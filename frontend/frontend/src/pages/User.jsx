@@ -182,79 +182,139 @@ const User = () => {
     }
 
     return (
-        <div>
-            <h1>Welcome, {userName || 'Unknown User'}</h1>
-            <h2>Name: {userName}</h2>
-            <h2>User ID: {userID}</h2>
-            <div>
-                <h3>Profile Picture</h3>
+        <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            {/* Welcome Card */}
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body text-center">
+                <h1 className="card-title">Welcome, {userName}</h1>
+                </div>
+            </div>
+    
+            {/* Profile Picture Card */}
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body text-center">
+                <h3 className="card-title">Profile Picture</h3>
                 {profileImage ? (
-                    <div>
-                        <img
-                            src={`http://localhost:8800/${profileImage}`} // Display the uploaded image
-                            alt="Profile"
-                            width="150"
-                            height="150"
-                        />
-                    </div>
+                  <img
+                    src={`http://localhost:8800/${profileImage}`}
+                    alt="Profile"
+                    className="rounded-circle mb-3"
+                    style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+                  />
                 ) : (
-                    <p>No profile picture available</p>
+                  <p>No profile picture available</p>
                 )}
+                <h3 className="card-subtitle mb-3">Name: {userName}</h3>
+                  <h3 className="card-subtitle">User ID: {userID}</h3>
+                
+                  <div 
+  className="mt-3 d-flex flex-column align-items-center" 
+  style={{ textAlign: 'center' }}
+>
+  <input
+    type="file"
+    className="form-control mb-2"
+    onChange={handleImageChange}
+    style={{ width: '50%' }} /* Adjust width as needed */
+  />
+  {imagePreview && (
+    <img
+      src={imagePreview}
+      alt="Image Preview"
+      style={{ height: '300px', width: '300px', marginBottom: '15px' }}
+    />
+  )}
+  <button 
+    className="btn btn-primary mt-2"
+    onClick={handleImageUpload}
+  >
+    Upload Profile Picture
+  </button>
+</div>
+  </div>
             </div>
-            <div>
-                <h3>Change Username</h3>
+    
+            {/* Change Username Card */}
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body">
+                <h3 className="card-title">Change Username</h3>
                 <input
-                    type="text"
-                    placeholder="Enter new username"
-                    value={newUserName}
-                    onChange={(e) => setNewUserName(e.target.value)}
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Enter new username"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
                 />
-                <button onClick={handleChangeName}>Update Username</button>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+                <button className="btn btn-success" onClick={handleChangeName}>
+                  Update Username
+                </button>
+                {error && <p className="text-danger mt-2">{error}</p>}
+                {successMessage && <p className="text-success mt-2">{successMessage}</p>}
+              </div>
             </div>
-            <div>
-                <h3>Update Profile Picture</h3>
-                <input type="file" onChange={handleImageChange} />
-                {imagePreview && <img src={imagePreview} alt="Image Preview" width="100" />}
-                <button onClick={handleImageUpload}>Upload Profile Picture</button>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+    
+            {/* Reset Password Card */}
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body">
+                <h3 className="card-title">Reset Password</h3>
+                <input
+                  type="password"
+                  className="form-control mb-2"
+                  placeholder="Enter current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  className="form-control mb-2"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  className="form-control mb-2"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button className="btn btn-warning" onClick={handleResetPassword}>
+                  Reset Password
+                </button>
+                {error && <p className="text-danger mt-2">{error}</p>}
+                {successMessage && <p className="text-success mt-2">{successMessage}</p>}
+              </div>
             </div>
-            <div>
-                <h3>Reset Password</h3>
-                <input
-                    type="password"
-                    placeholder="Enter current password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Enter new password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <button onClick={handleResetPassword}>Reset Password</button>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-            </div>
+ {/* Action Buttons */}
+<div className="d-flex flex-column align-items-center gap-2">
+  <Link 
+    to={role === 'admin' ? '/products' : '/home'} 
+    className="btn btn-primary w-100" 
+    style={{ maxWidth: '300px' }}
+  >
+    Back
+  </Link>
+  <button 
+    className="btn btn-danger w-100" 
+    onClick={handleDeleteAccount} 
+    style={{ maxWidth: '300px' }}
+  >
+    Delete Account
+  </button>
+  <button 
+    className="btn btn-secondary w-100" 
+    onClick={handleLogout} 
+    style={{ maxWidth: '300px' }}
+  >
+    Log Out
+  </button>
+</div>
 
-            <button onClick={handleLogout}>Log Out</button>
-            <button onClick={handleDeleteAccount} style={{ backgroundColor: 'red', color: 'white' }}>
-                Delete Account
-            </button>
-            <button>
-                <Link to={role === 'admin' ? '/products' : '/home'}>Back</Link>
-            </button>
+          </div>
         </div>
-    );
+      </div>    );
 };
 
 export default User;

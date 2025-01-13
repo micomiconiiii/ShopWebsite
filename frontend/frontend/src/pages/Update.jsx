@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+import "bootstrap/dist/css/bootstrap.min.css"; // Add Bootstrap CSS for styling
+import "../update.css";
 
 const Update = () => {
   const [shoe, setShoe] = useState({
@@ -11,153 +13,185 @@ const Update = () => {
     image: "",
     category: "",
   });
-  const [newCategory, setNewCategory] = useState(""); // State for adding a new category
-  const [categories, setCategories] = useState(["Men", "Women", "Kids"]); // Default categories
+  const [categories, setCategories] = useState(["Men", "Women", "Kids"]);
+  const [newCategory, setNewCategory] = useState("");
+  const [image, setImage] = useState(null);
+
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [tagsInput, setTagsInput] = useState([]); // Tags selected for the product
+  const [existingTags, setExistingTags] = useState([]); // Tags fetched from the database
+  const [newTag, setNewTag] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
-  const productID = location.pathname.split("/")[2]; // Get the shoe ID from URL
+  const productID = location.pathname.split("/")[2];
 
-  // Fetch the shoe data when the component loads
   useEffect(() => {
-    const fetchShoeData = async () => {
+    // Fetch product and tags data
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8800/products/${productID}`);
-        setShoe(response.data); // Set the fetched data into state
+        const [productResponse, tagsResponse] = await Promise.all([
+          axios.get(`http://localhost:8800/products/${productID}`),
+          axios.get("http://localhost:8800/tags"),
+        ]);
+        setShoe(productResponse.data);
+        setTagsInput(productResponse.data.tags || []); // Assuming product tags are included
+        setExistingTags(tagsResponse.data);
       } catch (error) {
-        console.error("Error fetching shoe data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchShoeData();
+    fetchData();
   }, [productID]);
 
-  // Handle input changes for form fields
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Ensure stock value is not negative
+    if (name === "stock" && value < 0) {
+      alert("Stock cannot be negative!");
+      return;
+    }
+  
     setShoe((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Handle the addition of a new category
   const handleAddCategory = () => {
-    if (newCategory.trim() !== "" && !categories.includes(newCategory.trim())) {
-      setCategories((prevCategories) => [...prevCategories, newCategory.trim()]);
-      setNewCategory(""); // Clear the new category input after adding
-    } else {
-      alert("Please enter a valid and unique category name.");
+    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+      setCategories((prev) => [...prev, newCategory.trim()]);
+      setNewCategory("");
     }
   };
 
-  // Handle removal of a category
-  const handleRemoveCategory = (category) => {
-    setCategories((prevCategories) => prevCategories.filter((item) => item !== category));
+
+  const handleFileChange = (e) => {
+    setImage(e.target.files[0]);
   };
 
-  // Handle form submission to update the product
-  const handleClick = async (e) => {
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    for (const key in shoe) {
+      formData.append(key, shoe[key]);
+    }
+    if (image) formData.append("image", image);
+
     try {
-      // Send a PUT request to update the product
-      await axios.put(`http://localhost:8800/products/${productID}`, shoe);
-      // After the update, navigate to the homepage or another page
+      await axios.put(`http://localhost:8800/products/${productID}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Product updated successfully!");
       navigate("/products");
-    } catch (err) {
-      console.log("Error updating shoe:", err);
+    } catch (error) {
+      console.error("Error updating product:", error);
     }
   };
 
   return (
-    <div className="form">
-      <h1>Update Item</h1>
+    <div className='body-update'>
+    <div className="container-update mt-5">
+      <h1 className="mb-4">Update Item</h1>
 
-      <div className='form-group'>
-        <label htmlFor="productName">Product Name</label>
-        <input
-          type="text"
-          placeholder={shoe.prod_name || "Name"}
-          value={shoe.prod_name || ""}
-          onChange={handleChange}
-          name="prod_name"
-        />
-      </div>
-      <div className='form-group'>
-        <label htmlFor="description">Description</label>
-        <input
-          type="text"
-          placeholder={shoe.prod_description || "Description"}
-          value={shoe.prod_description || ""}
-          onChange={handleChange}
-          name="prod_description"
-        />
-      </div>
-      <div className='form-group'>
-        <label htmlFor="price">Price</label>
-        <input
-          type="number"
-          placeholder={shoe.price || "Price"}
-          value={shoe.price || ""}
-          onChange={handleChange}
-          name="price"
-        />
-      </div>
-      <div className='form-group'>
-        <label htmlFor="stock">Stock</label>
-        <input
-          type="number"
-          placeholder={shoe.stock || "Stock"}
-          value={shoe.stock || ""}
-          onChange={handleChange}
-          name="stock"
-        />
-      </div>
-      <div className='form-group'>
-        <label htmlFor="image">Image</label>
-        <input
-          type="text"
-          placeholder={shoe.image || "Image URL"}
-          value={shoe.image || ""}
-          onChange={handleChange}
-          name="image"
-        />
-      </div>
-      <div className='form-group'>
-        <label htmlFor="category">Category</label>
-        <select 
-          value={shoe.category || ""}
-          onChange={handleChange}
-          name="category"
-        >
-          <option value="">Select Category</option>
-          {categories.map((category, index) => (
-            <option key={index} value={category}>{category}</option>
-          ))}
-        </select>
-
-        {/* Input field for custom category */}
-        <input
-          type="text"
-          placeholder="Add a new category"
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-        />
-        <button type="button" onClick={handleAddCategory}>Add Category</button>
-
-        {/* Display the list of added categories with Remove buttons */}
-        <div>
-          <h4>Added Categories:</h4>
-          <ul>
-            {categories.map((category, index) => (
-              <li key={index}>
-                {category}{" "}
-                <button type="button" onClick={() => handleRemoveCategory(category)}>
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* Product Form */}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-update-label">Product Name</label>
+          <input
+            type="text"
+            className="form-control"
+            name="prod_name"
+            value={shoe.prod_name || ""}
+            onChange={handleChange}
+          />
         </div>
-      </div>
 
-      <button onClick={handleClick}>Update</button>
+        <div className="mb-3">
+          <label className="form-update-label">Description</label>
+          <input
+            type="text"
+            className="form-control"
+            name="prod_description"
+            value={shoe.prod_description || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Price</label>
+          <input
+            type="number"
+            className="form-control"
+            name="price"
+            value={shoe.price || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Stock</label>
+          <input
+            type="number"
+            className="form-control"
+            name="stock"
+            value={shoe.stock || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Image</label>
+          <input
+            type="file"
+            className="form-control"
+            onChange={handleFileChange}
+            accept="image/*"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Category</label>
+          <select
+            className="form-select"
+            name="category"
+            value={shoe.category || ""}
+            onChange={handleChange}
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+
+          <div className="mt-2">
+            <input
+              type="text"
+              className="form-control"
+              value={newCategory}
+              placeholder="Add new category"
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn btn-warning text-white mt-2"
+              onClick={handleAddCategory}
+            >
+              Add Category
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <button className='btn btn-warning text-white' type="submit">
+            Update
+          </button>
+        </div>
+      </form>
+      </div>
     </div>
   );
 };

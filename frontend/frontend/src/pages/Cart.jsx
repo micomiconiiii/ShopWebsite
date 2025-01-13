@@ -14,7 +14,7 @@ const Cart = () => {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [debitCardInfo, setDebitCardInfo] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
     const [eWalletInfo, setEWalletInfo] = useState({ walletId: '', pin: '' });
-
+    
     // Use useEffect to fetch cart items
     useEffect(() => {
         if (userId) {
@@ -160,8 +160,19 @@ const Cart = () => {
             }
         });
     };
-
     return (
+        <div>
+        <div>
+            {/* Navbar */}
+                  <nav className={"navbar-1"}>
+                  <div className="logo">
+                    <img src="/HAUTE.png" alt="Logo" className="logo-img" />
+                  </div>
+        
+                  
+                  </nav>
+                     
+        </div> 
         <div className="cart-container">
             <h1 className="cart-title">Your Shopping Cart</h1>
             <table className="cart-table">
@@ -203,7 +214,7 @@ const Cart = () => {
 
             <div className="cart-summary">
                 <h2>Total for Selected Items: ${selectedTotal.toFixed(2)}</h2>
-                <h3>Total inside the Cart: ${total.toFixed(2)}</h3>
+                <h3 style={{color: '#616060'}}>Total inside the Cart: ${total.toFixed(2)}</h3>
                 
             </div>
 
@@ -281,10 +292,24 @@ const Cart = () => {
                 </div>
             )}
 
-            <div className="cart-actions">
-                <button onClick={handleCheckOut} className="checkout-btn">Proceed to Checkout</button>
-                <Link to="/home" className="back-to-home">Back to Home</Link>
-            </div>
+<div className="cart-actions text-center">
+    <div className="row">
+        <div className="col-12">
+            <button onClick={handleCheckOut} className="checkout-btn btn btn-success w-100">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+    <div className="row mt-2">
+        <div className="col-12">
+            <Link to="/home" className="back-to-home btn w-100">
+                Back to Home
+            </Link>
+        </div>
+    </div>
+</div>
+
+        </div>
         </div>
     );
 };

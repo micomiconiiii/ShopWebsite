@@ -1,6 +1,6 @@
 /* Root container taking the full viewport */
 .landing-page {
-    background-image: url("D:/Documents/JHONDEL MICO ABAS/TUP/Web Development/project-ecommerce/backend/uploads/UI (1920 x 1080 px).png"); /* Replace with your image */
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\pexels-berlinerlights-30096508.jpg"); /* Replace with your image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,20 +29,23 @@
     text-decoration: none;
     margin-left: 1rem;
     font-weight: bold;
+    font-size: large;
 }
 
 .nav-links a:hover {
-    text-decoration: underline;
+    color: #F2A950;
+    text-decoration: none;
 }
 
 /* Logo */
 .logo-img {
     height: 50px;
     width: auto; /* Keeps aspect ratio */
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\HAUTE.png");
 }
 
 /* Hero section */
-.hero-section {
+.section {
     flex: 1; /* Fills remaining space */
     display: flex;
     flex-direction: column;
@@ -50,37 +53,51 @@
     align-items: center;
     text-align: center;
     color: white;
-    padding-bottom: 9rem; /* Adds spacing from the bottom */
+    padding-bottom: 5rem; /* Adds spacing from the bottom */
     box-sizing: border-box; /* Ensures padding doesn't affect layout */
 }
 
-/* Hero image */
-.hero-img {
-    max-width: 80%;
-    height: auto; /* Maintain aspect ratio */
-    margin-bottom: rem;
-}
 
 /* Browse button */
-.browse-btn {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
-    color: #FFFFF0; /* Pale white text color */
-    background-color: transparent; /* Transparent background */
-    border: 2px solid #FFFFF0; /* White outline */
-    border-radius: 25px; /* Fully rounded corners */
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1rem;
+
+.browse-btn:hover {
+    background-color: #F2A950; /* Slightly transparent pale white on hover */
+    color: #FFFFFF; /* Change text to full white on hover */
+    border-color: #FFFFFF; /* Slightly bolder outline on hover */
+}
+.hero {
     text-align: center;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth hover effect */
+    color: #fff;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 4rem 1rem;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+}
+.browse-btn {
+    padding: 0.75rem 1.5rem;
+    color: #fff;
+    background-color: #f2a950;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .browse-btn:hover {
-    background-color: rgba(255, 255, 240, 0.1); /* Slightly transparent pale white on hover */
-    color: #FFFFFF; /* Change text to full white on hover */
-    border-color: #FFFFFF; /* Slightly bolder outline on hover */
+    background-color: #e59040;
+    transform: scale(1.05);
 }
 
 /* Responsive Design */

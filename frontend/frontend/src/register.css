@@ -156,3 +156,75 @@
     width: 90%;
   }
 }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.register-container {
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\cesar-cid-RQQWfz5Ir0w-unsplash.jpg");
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   
+}
+.register-form-container {
+    display: flex;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.7)); /* Gradient lighter at top-left */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+    backdrop-filter: blur(3px);
+    border-radius: 10px;
+    color: #faf8f9;     
+    overflow: hidden;
+    max-width: 50em;
+    width: 100%;
+}
+.input-box{
+    color: #faf8f9; /* Text inside input becomes white */
+    background: transparent; /* Optional: transparent background */
+    border: 1px solid #ccc; /* Optional: subtle border */
+    padding: 0.5em;
+    border-radius: 4px;
+}
+
+.input-box1::placeholder {
+    color: rgba(255, 255, 255, 0.7); /* Lighter white for placeholder text */
+    opacity: 1; /* Ensure visibility in some browsers */
+}
+.left-section {
+    flex: 1;
+    padding: 5rem;
+    background: transparent;
+    font-family: Poppins;
+    
+}
+
+.right-section {
+    width: 400px; /* Fixed width for the right section */
+    height: 500px;
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\nathan-mcdine-U5gkKo9ES2w-unsplash.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.button {
+    background:  rgba(255, 255, 255, 0.2); /* Gradient lighter at top-left */
+    text-decoration: none;
+    border-radius: 8px;
+    color: white;
+    border: solid 1px white;
+    padding: 0.4em;
+}
+.button:hover {
+    background-color: #444; /* Slightly lighter shade on hover */
+    color: white; /* Ensure text color stays the same */
+}
+
+.custom-text {
+    color: white;
+}

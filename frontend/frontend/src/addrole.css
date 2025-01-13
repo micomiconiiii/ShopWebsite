@@ -1,0 +1,118 @@
+/* General styles for the body */
+.add-role {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-image: url("D:\nattu-adnan-atSUvc1hMwk-unsplash.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.add-user-container {
+    width: 400px;
+    background-image: url("D:\nattu-adnan-atSUvc1hMwk-unsplash.jpg");
+   
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.7)); /* Gradient lighter at top-left */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+    backdrop-filter: blur(3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px 30px;
+    text-align: center;
+}
+.add-user-container .h1{
+    color: #faf8f9;     
+    font-weight: bolder;   
+}
+
+/* Form styles */
+.add-user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+}
+
+/* Form group styles */
+.form-group {
+    margin-bottom: 10px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Submit button styles */
+.submit-button {
+    background:  #444; /* Gradient lighter at top-left */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #202020;
+}
+
+/* Error message styles */
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+/* modals styles */
+.modals, .otp-modals {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.modals-content, .otp-modals-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 300px;
+}
+
+.modals-content h3, .otp-modals-content h3 {
+    margin-bottom: 15px;
+}
+
+/* modals button styles */
+.modals button, .otp-modals button {
+    background:  rgba(255, 255, 255, 0.2); /* Gradient lighter at top-left */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modals button:hover, .otp-modals button:hover {
+    background-color: #45a049;
+}

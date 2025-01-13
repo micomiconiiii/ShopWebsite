@@ -1,11 +1,3 @@
-/*
-- browse
-- log in
-- sign up
-- picture
-- navbar
-- logo
-*/
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../LandingPage.css'; // Create a CSS file for styling
@@ -20,7 +12,7 @@ console.log(`Viewport Height: ${window.innerHeight}px`);
             {/* Navbar Section */}
             <nav className="navbar">
                 <div className="logo">
-                    <img src="/logo.png" alt="Logo" className="logo-img" /> {/* Replace with your logo image */}
+                    <img src="/HAUTE.png" alt="Logo" className="logo-img" /> {/* Replace with your logo image */}
                 </div>
                 <div className="nav-links">
                     <Link to="/home">Browse</Link>
@@ -30,10 +22,12 @@ console.log(`Viewport Height: ${window.innerHeight}px`);
             </nav>
 
             {/* Main Content Section */}
-            <div className="main-content">
-                <div className="hero-section">
-                    <Link to="/home" className="browse-btn">Browse Now</Link>
-                </div>
+            <div className="container hero">
+                <h1 style={{color:'#f9f8fa'}}className="hero-title">Discover the Latest Trends</h1>
+                <p className="hero-subtitle">Step into the future of fashion with Haute.</p>
+                <Link to="/home" className="browse-btn">
+                    Browse Now
+                </Link>
             </div>
         </div>
     );

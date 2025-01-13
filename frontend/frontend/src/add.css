@@ -1,0 +1,79 @@
+
+.form {
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\pexels-godisable-jacob-226636-1252982.jpg");
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full screen height */
+    background-color: #f4f4f4; /* Light background for the page */
+    padding: 20px;
+  }
+  
+  .form h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .form input,
+  .form select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .form input[type="file"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .form button {
+    background-color: #F29F05;
+    color: white;
+    padding: 12px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .form button:hover {
+    background-color: #F29F05;
+    font-weight: bolder;
+  }
+  
+  .form select {
+    font-size: 1rem;
+  }
+  
+  .form .card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    width: 100%;
+    max-width: 500px; /* Maximum width for the card */
+  }
+  
+  .form .card input,
+  .form .card select,
+  .form .card button {
+    margin-bottom: 15px; /* Space between inputs and button */
+  }
+  
+  .form .card input[type="file"] {
+    padding: 5px;
+    font-size: 1rem;
+  }
+  
+  

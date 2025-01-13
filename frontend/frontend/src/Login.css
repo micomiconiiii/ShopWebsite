@@ -1,100 +1,72 @@
-/* Root container for the login page */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
 .login-container {
-    background-image: url("D:/Documents/JHONDEL MICO ABAS/TUP/Web Development/project-ecommerce/backend/uploads/UI (1920 x 1080 px).png"); /* Replace with your image */
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\daoudi-aissa-36pHgMJL_SA-unsplash.jpg");
     background-size: cover;
-    background-position: center;
+    background-position: top;
     background-repeat: no-repeat;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
+   
 }
-
-/* Form container for login and OTP sections */
-.form-container {
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+.login-form-container {
+    display: flex;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.7)); /* Gradient lighter at top-left */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+    backdrop-filter: blur(3px);
+    border-radius: 10px;
+    color: #faf8f9;     
+    overflow: hidden;
+    max-width: 50em;
     width: 100%;
-    max-width: 400px;
-    color: white;
+}
+.input-box {
+    color: #faf8f9; /* Text inside input becomes white */
+    background: transparent; /* Optional: transparent background */
+    border: 1px solid #ccc; /* Optional: subtle border */
+    padding: 0.5em;
+    border-radius: 4px;
 }
 
-/* Heading styling */
-.form-container h2 {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+.input-box::placeholder {
+    color: rgba(255, 255, 255, 0.7); /* Lighter white for placeholder text */
+    opacity: 1; /* Ensure visibility in some browsers */
+}
+.left-section {
+    flex: 1;
+    padding: 5rem;
+    background: transparent;
+    font-family: Poppins;
+    
 }
 
-/* Input field styling */
-input[type="email"],
-input[type="password"],
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #fff;
-    border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    font-size: 1rem;
+.right-section-login {
+    width: 400px; /* Fixed width for the right section */
+    height: 500px;
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\mingyu ulit.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
-
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="text"]:focus {
-    border-color: #FFFFF0;
-    outline: none;
-}
-
-/* Button styling */
-button {
-    background-color: transparent;
-    border: 2px solid #FFFFF0;
-    color: #FFFFF0;
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-}
-
-button:hover {
-    background-color: rgba(255, 255, 240, 0.1); /* Slightly transparent pale white on hover */
-    color: #FFFFFF;
-    border-color: #FFFFFF;
-}
-
-/* Error messages */
-p[style="color: red"] {
-    color: red;
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-/* Register link styling */
-p {
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-button a {
-    color: #FFFFF0;
+.button {
+    background:  rgba(255, 255, 255, 0.2); /* Gradient lighter at top-left */
     text-decoration: none;
-    font-weight: bold;
+    border-radius: 8px;
+    color: white;
+    border: solid 1px white;
+    padding: 0.4em;
+}
+.button:hover {
+    background-color: #444; /* Slightly lighter shade on hover */
+    color: white; /* Ensure text color stays the same */
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .form-container {
-        width: 90%;
-        padding: 20px;
-    }
+.custom-text {
+    color: white;
 }

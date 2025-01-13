@@ -1,0 +1,150 @@
+
+
+.product {
+    box-sizing: border-box;
+    background-color: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: transform 0.2s;
+    /* This ensures 3 items per row with proper gap */
+  }
+  
+  .product:hover {
+    transform: scale(1.05);
+  }
+  
+  .product img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+  
+  /* Optional: Make sure that stock-out products look dimmed */
+  .product[style*="background-color: #d3d3d3"] {
+    opacity: 0.6;
+  }
+  .cover{
+    background-image: url("D:\Documents\JHONDEL MICO ABAS\TUP\Web Development\project-ecommerce\backend\uploads\source-image\pexels-rdne-8760413.jpg");
+    background-size: cover;
+    background-position: 'top';
+    height: 100vh;
+    width: 100%;
+    border-radius: '10px';
+   
+  }
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+  }
+  
+  .overlay-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* For spacing on smaller screens */
+  }
+  
+  .carousel-img {
+    height: 100vh; /* Full viewport height */
+    object-fit: cover;
+  }
+  
+  .overlay-heading {
+    font-size: 1.5rem; /* Smaller font size for small screens */
+  }
+  
+  @media (max-width: 768px) {
+    .overlay-content {
+      padding: 10px;
+    }
+  
+    .overlay-heading {
+      font-size: 1.2rem; /* Further reduce font size for smaller screens */
+    }
+  
+    .carousel-img {
+      object-fit: cover; /* Ensure image fits nicely */
+    }
+  }
+  
+  .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: transparent; /* Default transparent background */
+    transition: background-color 0.3s ease; /* Smooth background transition */
+  }
+  .navbar.scrolled {
+    background-color: rgb(26, 25, 25); 
+  }
+  
+  .logo-img {
+    max-height: 50px; 
+  }
+  
+
+.navbar-nav .nav-link {
+  color: #f9f8fa;}
+
+.navbar-nav .nav-link:hover {
+  color: #f9faf8;
+  font-weight: bolder;
+  transition: font-weight 0.5s ease;
+}
+
+
+
+.navbar-toggler {
+  border: 1px solid white;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23FFFFFF' d='M1.5 12.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1zm0-5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1zm0-5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1z'/%3E%3C/svg%3E");
+}
+
+.navbar-toggler:hover{
+  background-color: #F27405;
+}
+
+#btn{
+  background-color: #F29F05;
+  text-decoration: none;
+  color: #f9f8fa
+}
+/*buttons*/
+.btn {
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../add.css'; // Assuming we will add custom CSS here
+
 
 const AddProduct = () => {
   const [product, setProduct] = useState({
@@ -65,6 +67,7 @@ const AddProduct = () => {
 
   return (
     <div className="form">
+      <div className='card'>
       <h1>Add Product</h1>
       <input type="text" placeholder="Name" onChange={handleChange} name="prod_name" />
       <input type="text" placeholder="Description" onChange={handleChange} name="prod_description" />
@@ -80,6 +83,7 @@ const AddProduct = () => {
       </div>
       <input type="file" onChange={handleFileChange} accept="image/*" />
       <button onClick={handleAddProduct}>Add Product</button>
+    </div>
     </div>
   );
 };

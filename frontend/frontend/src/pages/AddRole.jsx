@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import '../register.css'; // Assuming we will add custom CSS here
-
+import '../addrole.css';
 const AddUser = () => {
   const [user, setUser] = useState({
     name: "",
@@ -15,12 +14,12 @@ const AddUser = () => {
   const [errorMessage, setErrorMessage] = useState(""); // Password mismatch error
   const [otp, setOtp] = useState(""); // OTP state
   const [otpSent, setOtpSent] = useState(false); // State to track OTP sent status
-  const [showModal, setShowModal] = useState(false);
+  const [showmodals, setShowmodals] = useState(false);
   const [otpError, setOtpError] = useState(""); // OTP error message
   const navigate = useNavigate();
 
   const handleDisagree = () => {
-    setShowModal(false);
+    setShowmodals(false);
     setUser({
       name: "",
       email: "",
@@ -48,8 +47,8 @@ const AddUser = () => {
     setOtpError(""); // Clear OTP error message while typing
   };
 
-  const closeModal = () => {
-    setShowModal(false);
+  const closemodals = () => {
+    setShowmodals(false);
     sendOtp(); // Send OTP when user agrees
   };
 
@@ -135,17 +134,18 @@ const AddUser = () => {
   const handleClick = (e) => {
     e.preventDefault(); // Prevent form submission
 
-    // If role is admin, show modal to confirm agreement
+    // If role is admin, show modals to confirm agreement
     if (user.role.toLowerCase() === "admin") {
-      setShowModal(true);
+      setShowmodals(true);
     } else {
       handleUserCreation(); // Proceed with user creation
     }
   };
 
   return (
+    <div className="add-role">
     <div className="add-user-container">
-      <h1>Add New User or Admin</h1>
+      <h1 className="h1">Add New User or Admin</h1>
       <form className="add-user-form" onSubmit={handleClick}>
         <div className="form-group">
           <input
@@ -212,23 +212,23 @@ const AddUser = () => {
         {error && <p className="error-message">{error}</p>}
       </form>
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
+      {showmodals && (
+        <div className="modals">
+          <div className="modals-content">
             <h3>Admin Terms and Conditions</h3>
             <p>
               "By adding a new admin, you acknowledge and consent to sharing the 
               business's personal information with this account."
             </p>
-            <button onClick={closeModal}>I Agree</button>
+            <button onClick={closemodals}>I Agree</button>
             <button onClick={handleDisagree}> I Disagree </button>
           </div>
         </div>
       )}
 
       {otpSent && (
-        <div className="otp-modal">
-          <div className="otp-modal-content">
+        <div className="otp-modals">
+          <div className="otp-modals-content">
             <h3>Enter OTP</h3>
             <input
               type="text"
@@ -241,6 +241,7 @@ const AddUser = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -333,19 +333,51 @@ app.listen(8800, () => {
     console.log("Backend connected on port 8800");
 });
 // deletes the product based on the ID
-app.delete("/products/:id", (req,res)=>{
+app.delete("/products/:id", (req, res) => {
     const shoeId = req.params.id;
-    const q = "DELETE FROM products WHERE id = ?" // executes sql statements for deleting items
-    db.query(q, [shoeId], (err, data)=>{
-        if (err) return res.json(err)
-        return res.json("Successfully executed")
-    })
-})
+    console.log("Deleting", shoeId);
 
+    // Delete associated cart items
+    const deleteCartItems = "DELETE FROM cart_items WHERE shoe_id = ?";
+    db.query(deleteCartItems, [shoeId], (err) => {
+        if (err) {
+            console.error("Error deleting cart items:", err);
+            return res.status(500).json(err);
+        }
+
+        // Delete the product
+        const deleteProduct = "DELETE FROM products WHERE id = ?";
+        db.query(deleteProduct, [shoeId], (err) => {
+            if (err) {
+                console.error("Error deleting product:", err);
+                return res.status(500).json(err);
+            }
+
+            return res.json("Successfully deleted product and associated cart items.");
+        });
+    });
+});
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Directory to store uploaded files
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`); // Generate a unique file name
+    },
+  });
+const upload = multer({ storage });
 // updates the product based on the ID without requiring all fields to be populated
-app.put("/products/:id", async (req, res) => {
+app.put("/products/:id", upload.single('image'), async (req, res) => {
     const shoeId = req.params.id;
-    const { prod_name, prod_description, image, price, stock, category } = req.body;
+    const { prod_name, prod_description, price, stock, category } = req.body;
+    let image = null;
+
+    // If an image is uploaded, normalize the file path
+    if (req.file) {
+        image = req.file.path.replace(/\\/g, '/');  // Normalize path by replacing backslashes with forward slashes
+        console.log('Normalized Image Path:', image);
+    }
 
     // Validate input data
     if (price && isNaN(price)) {
@@ -384,6 +416,7 @@ app.put("/products/:id", async (req, res) => {
         updates.push("stock = ?");
         values.push(stock);
     }
+
     if (category) {
         updates.push("category = ?");
         values.push(category);
@@ -407,19 +440,11 @@ app.put("/products/:id", async (req, res) => {
             return res.status(500).json({ error: "Error updating the product" });
         }
 
-        return res.json({ message: "product updated successfully" });
+        return res.json({ message: "Product updated successfully" });
     });
 });
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/'); // Directory to store uploaded files
-    },
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`); // Generate a unique file name
-    },
-  });
-  
-  const upload = multer({ storage });
+
+
   // Serve uploaded images
 
 // Route to handle product creation with an image
@@ -475,7 +500,7 @@ app.post('/products/addimage', upload.single('image'), async (req, res) => {
   });
   
   // Configure multer storage
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Route to get a single product by id
 app.get("/products/:id", (req, res) => {
@@ -818,15 +843,16 @@ app.post('/reviews', async (req, res) => {
 
 
 // tags
-// Create Tag (if not exists) and Associate with Product
+// Create Tag (if not exists) and return the tag's ID
 app.post('/tags', (req, res) => {
     const { name } = req.body;
-    const query = 'INSERT INTO tags (name) VALUES (?)';
+    const query = 'INSERT INTO tags (name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)';
     db.query(query, [name], (err, result) => {
-      if (err) return res.status(500).json({ error: 'Failed to create tag' });
-      res.status(200).json({ message: 'Tag created successfully' });
+        if (err) return res.status(500).json({ error: 'Failed to create or fetch tag' });
+        res.status(200).json({ id: result.insertId, name });
     });
-  });
+});
+
   
   // Add Tag to Product
   app.post('/product_tags', (req, res) => {
@@ -838,7 +864,32 @@ app.post('/tags', (req, res) => {
       res.status(200).json({ message: 'Tag added to product' });
     });
   });
-  
+  // Endpoint to disassociate a tag from a product
+app.delete('/product_tags', async (req, res) => {
+  const { product_id, tag_id } = req.body;
+  const productId = parseInt(product_id, 10);
+  const tagId = parseInt(tag_id, 10);
+  if (!product_id || !tag_id) {
+    return res.status(400).json({ error: 'Product ID and Tag ID are required.' });
+  }
+
+  try {
+    console.log("Product id is:", product_id);
+    console.log("tag id is:", tag_id);
+    
+    // Assuming a `product_tags` table exists with `product_id` and `tag_id` columns
+    await db.query('DELETE FROM product_tags WHERE product_id = ? AND tag_id = ?', [
+      productId,
+      tagId,
+    ]);
+
+    res.status(200).json({ message: 'Tag disassociated from product successfully.' });
+  } catch (err) {
+    console.error('Error removing tag association:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
   // Get Tags (for selection)
 app.get('/tags', (req, res) => {
     db.query('SELECT * FROM tags', (err, result) => {

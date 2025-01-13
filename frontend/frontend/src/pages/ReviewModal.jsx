@@ -45,10 +45,27 @@ const ReviewModal = ({ show, onClose, productID, productName, userID, onReviewSu
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <button className="close-button" onClick={onClose}>
+            <button
+                    className="close-button"
+                    onClick={onClose}
+                    aria-label="Close review modal"
+                    style={{
+                        position: 'absolute',
+                        top: '1px',
+                        right: '15px',
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '24px',
+                        color: '#aaa',
+                        cursor: 'pointer',
+                        transition: 'color 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#f00'} // Hover effect
+                    onMouseLeave={(e) => e.target.style.color = '#aaa'} // Hover effect
+                >
                     &times;
                 </button>
-                <h2>Leave a Review for {productName}</h2>
+                <h3 style={{margin:'30px'}}>Leave a Review for {productName}</h3>
                 {error && <p className="error">{error}</p>}
                 {success ? (
                     <div className="review-summary">
@@ -80,13 +97,15 @@ const ReviewModal = ({ show, onClose, productID, productName, userID, onReviewSu
                         <div>
                             <label>Comment:</label>
                             <textarea
+                                
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 placeholder="Write your review here"
                                 required
+                                style={{padding:'15px'}}
                             ></textarea>
                         </div>
-                        <button type="submit">Submit Review</button>
+                        <button style={{backgroundColor:'#444'}}type="submit">Submit Review</button>
                     </form>
                 )}
             </div>

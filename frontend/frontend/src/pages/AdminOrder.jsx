@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-
+import '../adminorder.css';
 const OrdersList = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -67,6 +67,12 @@ const OrdersList = () => {
 
     return (
         <div>
+            <div>
+                <button className='back' type="button">
+                    <Link to="/products">Back</Link>
+                </button>
+            </div>
+        <div className="orders-container">
             {orders.map((order) => {
                 // Parse items from JSON column
                 const items = Array.isArray(JSON.parse(order.items)) ? JSON.parse(order.items) : [];
@@ -83,7 +89,7 @@ const OrdersList = () => {
                         </div>
                         <div className="order-items">
                             <h3>Items</h3>
-                            <div className="items-list">
+                            <div className="items-list mb-5">
                                 {items.map((item, index) => (
                                     <div key={index} className="item">
                                         <p><strong>Product Name:</strong> {item.productName}</p>
@@ -97,7 +103,7 @@ const OrdersList = () => {
                         <div className="order-actions">
                             <button
                                 onClick={() => handleDelete(order.orderID)}
-                                className="cancel-button"
+                                className="cancel-button minimal-btn"
                                 disabled={order.status === 'Delivered'} // Disable button if status is "Delivered"
                             >
                                 Cancel Order
@@ -143,19 +149,19 @@ const OrdersList = () => {
                             <label>Shipping Address:</label>
                             <input type="text" name="shippingAddress" defaultValue={selectedOrder.shippingAddress} />
                         </div>
-                        <button type="submit">Save Changes</button>
-                        <button type="button" onClick={() => setIsUpdating(false)}>
+                        <div className='action'>
+                        <button className='minimal-btn' type="submit">Save Changes</button>
+                        <button className='minimal-btn'type="button" onClick={() => setIsUpdating(false)}>
                             Cancel
                         </button>
+                        </div>
                     </form>
                 </div>
             )}
 
-            <div>
-                <button type="button">
-                    <Link to="/products">Back</Link>
-                </button>
-            </div>
+            
+        </div>
+        
         </div>
     );
 };
